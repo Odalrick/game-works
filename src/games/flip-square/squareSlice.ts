@@ -6,12 +6,24 @@ export enum CellState {
   OFF = "OFF",
 }
 
-type Grid = CellState[]
+export type Grid = CellState[]
 
 type SquareState = {
   grid: Grid
 }
-type Coordinate = [number, number]
+export type Coordinate = [number, number]
+
+export const solvedGrid = [
+  CellState.ON,
+  CellState.ON,
+  CellState.ON,
+  CellState.ON,
+  CellState.ON,
+  CellState.ON,
+  CellState.ON,
+  CellState.ON,
+  CellState.ON,
+]
 
 export function indexFromCoordinate(c: Coordinate): number {
   const [x, y] = c
@@ -27,6 +39,9 @@ export function coordinateFromIndex(i: number): Coordinate {
 function getCell(grid: Grid, x: number, y: number): CellState {
   return grid[indexFromCoordinate([x, y])]
 }
+
+export const presentCoordinate = (c: Coordinate): string => `(${c[0]}, ${c[1]})`
+export const presentCoordinates = R.pipe(R.map(presentCoordinate), R.join(", "))
 
 function asString(grid: Grid): string {
   return R.pipe(
@@ -47,7 +62,7 @@ export const xoParser = (str: string): Grid => {
   return parseString("x", "o", str)
 }
 
-export function flips(flips: Coordinate[], grid: Grid): Grid {
+function flips(flips: Coordinate[], grid: Grid): Grid {
   const indices = R.map(indexFromCoordinate, flips)
   const mapIndexed = R.addIndex(R.map) as (
     fn: (cell: CellState, idx: number) => CellState,
@@ -83,6 +98,39 @@ const filterValidCoordinates = R.filter(validCoordinate)
 export function flipNeighbors(c: Coordinate, grid: Grid): Grid {
   return flips(filterValidCoordinates(neighbors(c)), grid)
 }
+
+export function solve(grid: Grid): number[] | undefined {
+  type GridState = {
+    grid: Grid
+    flips: number[]
+  }
+
+  const queue: GridState[] = [{ grid, flips: [] }]
+  const visited = new Set<string>()
+
+  while (queue.length > 0) {
+    const { grid: currentGrid, flips: currentFlips } = queue.shift()!
+    if (isSolved(currentGrid)) {
+      return currentFlips
+    }
+
+    for (const i of R.range(0, 9)) {
+      if (!currentFlips.includes(i)) {
+        const newGrid = flipNeighbors(coordinateFromIndex(i), currentGrid)
+        const newGridString = asString(newGrid)
+        if (!visited.has(newGridString)) {
+          visited.add(newGridString)
+          queue.push({ grid: newGrid, flips: [...currentFlips, i] })
+        }
+      }
+    }
+  }
+
+  return undefined // If no solution is found
+}
+
+const isSolved = R.equals(solvedGrid)
+
 class Square {
   state: SquareState
   constructor(public grid: Grid) {
@@ -98,17 +146,7 @@ class Square {
   }
 }
 
-const initialState: Square = new Square([
-  CellState.ON,
-  CellState.ON,
-  CellState.ON,
-  CellState.ON,
-  CellState.ON,
-  CellState.ON,
-  CellState.ON,
-  CellState.ON,
-  CellState.ON,
-])
+const initialState: Square = new Square(solvedGrid)
 
 export const squareSlice = createSlice({
   name: "square",
@@ -123,5 +161,5 @@ export const squareSlice = createSlice({
   },
 })
 
-export const { setGrid, flip } = squareSlice.actions
+export const actions = squareSlice.actions
 export default squareSlice.reducer

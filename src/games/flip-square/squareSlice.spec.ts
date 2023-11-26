@@ -2,14 +2,15 @@ import { describe, expect, it } from "@jest/globals"
 
 import reducer, {
   CellState,
-  setGrid,
-  flip,
+  actions,
   indexFromCoordinate,
   coordinateFromIndex,
   xoParser,
 } from "./squareSlice"
+import * as square from "./squareSlice"
 import * as R from "ramda"
 
+const { setGrid, flip } = actions
 const g = R.pipe(
   R.filter(R.includes(R.__, ["x", "o"])),
   R.splitEvery(3),
@@ -59,6 +60,31 @@ describe("game reducer", () => {
       ooo
       xxx`),
     )
+  })
+
+  it("should read correct coordinates", () => {
+    // The y coordinate goes _up_.
+    const squareState = reducer(
+      undefined,
+      setGrid(
+        xoParser(
+          `
+            xox
+            ooo
+            xxx`,
+        ),
+      ),
+    )
+
+    expect(squareState.getCell(0, 0)).toEqual(CellState.ON)
+    expect(squareState.getCell(1, 0)).toEqual(CellState.ON)
+    expect(squareState.getCell(2, 0)).toEqual(CellState.ON)
+    expect(squareState.getCell(0, 1)).toEqual(CellState.OFF)
+    expect(squareState.getCell(1, 1)).toEqual(CellState.OFF)
+    expect(squareState.getCell(2, 1)).toEqual(CellState.OFF)
+    expect(squareState.getCell(0, 2)).toEqual(CellState.ON)
+    expect(squareState.getCell(1, 2)).toEqual(CellState.OFF)
+    expect(squareState.getCell(2, 2)).toEqual(CellState.ON)
   })
 
   const boards: { input: string; expected: string; flip: [number, number] }[] =
@@ -141,4 +167,33 @@ describe("grid functions", () => {
       [2, 2],
     ])
   })
+
+  const flipTests = [
+    [1, 3, 4],
+    [0, 2, 3, 4, 5],
+    [1, 4, 5],
+    [0, 1, 4, 6, 7],
+    [0, 1, 2, 3, 5, 6, 7, 8],
+    [1, 2, 4, 7, 8],
+    [3, 4, 7],
+  ]
+
+  for (const indexFlips of flipTests) {
+    const flips: square.Coordinate[] = R.map(
+      square.coordinateFromIndex,
+      indexFlips,
+    )
+    const scrambled = R.reduce(
+      (acc, elem) => square.flipNeighbors(elem, acc),
+      square.solvedGrid,
+      flips,
+    )
+    it(`should solve grid ${square.presentCoordinates(flips)}`, () => {
+      const solution = square.solve(scrambled)
+      indexFlips.forEach((doFlip) => {
+        expect(solution).toContain(doFlip)
+      })
+      expect(solution).toHaveLength(flips.length)
+    })
+  }
 })
