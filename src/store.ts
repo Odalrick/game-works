@@ -1,9 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit"
-import counterReducer from "./counterSlice"
+import squareSlice from "@games/flip-square/squareSlice"
 
 const store = configureStore({
   reducer: {
-    counter: counterReducer,
+    square: squareSlice,
   },
 })
 

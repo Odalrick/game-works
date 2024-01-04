@@ -131,7 +131,7 @@ export function solve(grid: Grid): number[] | undefined {
 
 const isSolved = R.equals(solvedGrid)
 
-class Square {
+export class Square {
   state: SquareState
   constructor(public grid: Grid) {
     this.state = { grid }

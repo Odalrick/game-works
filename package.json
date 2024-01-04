@@ -9,7 +9,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "commit": "git-cz",
-    "test": "jest"
+    "test": "jest",
+    "watch": "jest --watch"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.7",

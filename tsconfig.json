@@ -18,6 +18,7 @@
 
     "baseUrl": "./src",
     "paths": {
+      "@games/*": ["games/*"]
     }
   },
   "include": ["src"],
