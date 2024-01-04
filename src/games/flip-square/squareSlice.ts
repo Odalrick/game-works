@@ -146,7 +146,7 @@ export class Square {
   }
 }
 
-const initialState: Square = new Square(solvedGrid)
+export const initialState: Square = new Square(solvedGrid)
 
 export const squareSlice = createSlice({
   name: "square",
@@ -163,3 +163,5 @@ export const squareSlice = createSlice({
 
 export const actions = squareSlice.actions
 export default squareSlice.reducer
+
+export type Action = ReturnType<(typeof actions)[keyof typeof actions]>
