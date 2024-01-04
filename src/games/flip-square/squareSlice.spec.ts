@@ -195,5 +195,14 @@ describe("grid functions", () => {
       })
       expect(solution).toHaveLength(flips.length)
     })
+    it(`should expose a solved cell method for ${square.presentCoordinates(
+      flips,
+    )}`, () => {
+      const s = new square.Square(scrambled)
+
+      indexFlips.forEach((doFlip) => {
+        expect(s.shouldFlip(...coordinateFromIndex(doFlip))).toBeTruthy()
+      })
+    })
   }
 })

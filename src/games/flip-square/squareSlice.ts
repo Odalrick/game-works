@@ -133,8 +133,11 @@ const isSolved = R.equals(solvedGrid)
 
 export class Square {
   state: SquareState
+  solution?: number[]
+
   constructor(public grid: Grid) {
     this.state = { grid }
+    this.solution = solve(this.state.grid) ?? []
   }
 
   getCell(x: number, y: number): CellState {
@@ -143,6 +146,13 @@ export class Square {
 
   toString(): string {
     return asString(this.state.grid)
+  }
+
+  shouldFlip(x: number, y: number): boolean {
+    if (this.solution === undefined) {
+      return false
+    }
+    return this.solution.includes(indexFromCoordinate([x, y]))
   }
 }
 
