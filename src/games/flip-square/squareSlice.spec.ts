@@ -134,6 +134,28 @@ describe("game reducer", () => {
       expect(squareState.toString()).toEqual(g(board.expected))
     })
   })
+
+  it("should mark a single square", () => {
+    const squareState = reducer(
+      reducer(
+        undefined,
+        setGrid(
+          xoParser(`
+          xox
+          ooo
+          xxx`),
+        ),
+      ),
+      actions.toggle([1, 1]),
+    )
+
+    expect(squareState.toString()).toEqual(
+      g(`
+          xox
+          oxo
+          xxx`),
+    )
+  })
 })
 
 describe("grid functions", () => {

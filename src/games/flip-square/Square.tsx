@@ -16,7 +16,7 @@ const Square: React.FC<SquareProps> = ({ square, action }) => {
     <div className="square">
       <Grid
         square={square}
-        onCellClick={(x, y) => action(actions.flip([x, y]))}
+        onCellClick={(x, y) => action(actions.toggle([x, y]))}
       />
     </div>
   )

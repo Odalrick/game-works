@@ -95,6 +95,15 @@ const validCoordinate = (c: Coordinate): boolean => {
 
 const filterValidCoordinates = R.filter(validCoordinate)
 
+export function toggleCell(c: Coordinate, grid: Grid): Grid {
+  const [x, y] = c
+  const cell = getCell(grid, x, y)
+  return R.update(
+    indexFromCoordinate(c),
+    cell === CellState.ON ? CellState.OFF : CellState.ON,
+    grid,
+  )
+}
 export function flipNeighbors(c: Coordinate, grid: Grid): Grid {
   return flips(filterValidCoordinates(neighbors(c)), grid)
 }
@@ -167,6 +176,9 @@ export const squareSlice = createSlice({
     },
     flip: (state: Square, action: PayloadAction<[number, number]>) => {
       return new Square(flipNeighbors(action.payload, state.state.grid))
+    },
+    toggle: (state: Square, action: PayloadAction<[number, number]>) => {
+      return new Square(toggleCell(action.payload, state.state.grid))
     },
   },
 })
