@@ -27,7 +27,7 @@ const Square: React.FC<SquareProps> = ({ square, action }) => {
           game.
         </p>
         <p>
-          <strong>Pro Tip:</strong> Right-click or long-click on a square to
+          <strong>Pro Tip:</strong> Right-click or tap-and-hold on a square to
           simulate a real game flip, affecting the clicked square and its
           orthogonal neighbors.
         </p>
@@ -35,6 +35,7 @@ const Square: React.FC<SquareProps> = ({ square, action }) => {
       <Grid
         square={square}
         onCellClick={(x, y) => action(actions.toggle([x, y]))}
+        onAlternateCellClick={(x, y) => action(actions.flip([x, y]))}
       />
     </div>
   )

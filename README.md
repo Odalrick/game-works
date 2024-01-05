@@ -50,6 +50,11 @@ The creation and use of puzzle games solvers serve dual roles - educational enha
 
 This project is an ongoing journey of learning and development, with many possibilities for future enhancements. Below are some of the ideas I'm considering, in no particular order:
 
+### Addressing Non-Serializable Values in Redux State
+- Currently, a class instance is being stored in the Redux state which is a non-serializable value. In the future, this will be refactored to store serializable objects instead, aligning with Redux best practices and ensuring compatibility with tools like Redux DevTools.
+
+I'm learning, you know...
+
 ### Internationalization and Localization (i18n and l10n)
 - Implementing support for multiple languages to make the app more accessible to a global audience.
 - Adding localization features to tailor the app to different cultural contexts.

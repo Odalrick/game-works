@@ -4,9 +4,14 @@ import { CellState, Square as SquareModel } from "./squareSlice"
 interface GridProps {
   square: SquareModel
   onCellClick: (x: number, y: number) => void
+  onAlternateCellClick: (x: number, y: number) => void
 }
 
-const Grid: React.FC<GridProps> = ({ square, onCellClick }) => {
+const Grid: React.FC<GridProps> = ({
+  square,
+  onCellClick,
+  onAlternateCellClick,
+}) => {
   const coordByRow = [
     [
       [0, 2],
@@ -33,6 +38,7 @@ const Grid: React.FC<GridProps> = ({ square, onCellClick }) => {
               cell={square.getCell(x, y)}
               onClick={() => onCellClick(x, y)}
               shouldFlip={square.shouldFlip(x, y)}
+              onAlternateClick={() => onAlternateCellClick(x, y)}
             >
               ({x}, {y})
             </Cell>
@@ -48,15 +54,31 @@ interface CellProps {
   children?: React.ReactNode
   onClick: () => void
   shouldFlip: boolean
+  onAlternateClick: () => void
 }
 
-const Cell: React.FC<CellProps> = ({ cell, children, onClick, shouldFlip }) => {
+const Cell: React.FC<CellProps> = ({
+  cell,
+  children,
+  onClick,
+  shouldFlip,
+  onAlternateClick,
+}) => {
   const color = cell === CellState.ON ? "green" : "red"
+  const onContextMenu = (event: React.MouseEvent) => {
+    onAlternateClick()
+    event.preventDefault()
+  }
+
+  const clickEvents = {
+    onContextMenu,
+    onClick,
+  }
   return (
     <div
       className="cell"
       style={{ width: "50px", height: "50px", backgroundColor: color }}
-      onClick={onClick}
+      {...clickEvents}
     >
       {shouldFlip && <div className="circle" />}
       {children}
