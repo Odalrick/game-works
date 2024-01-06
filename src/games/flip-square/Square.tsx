@@ -36,6 +36,7 @@ const Square: React.FC<SquareProps> = ({ square, action }) => {
         square={square}
         onCellClick={(x, y) => action(actions.toggle([x, y]))}
         onAlternateCellClick={(x, y) => action(actions.flip([x, y]))}
+        onReset={() => action(actions.reset())}
       />
     </div>
   )

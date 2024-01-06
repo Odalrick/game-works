@@ -180,6 +180,9 @@ export const squareSlice = createSlice({
     toggle: (state: Square, action: PayloadAction<[number, number]>) => {
       return new Square(toggleCell(action.payload, state.state.grid))
     },
+    reset: () => {
+      return new Square(solvedGrid)
+    },
   },
 })
 
