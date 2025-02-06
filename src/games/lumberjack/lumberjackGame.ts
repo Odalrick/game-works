@@ -37,7 +37,9 @@ export interface PredictedTile {
 }
 
 export type Game = {
-  grid: Tile[][]
+  grid: Tile[] // one-dimensional array
+  width: number
+  height: number
   plan?: Action
   prediction?: PredictedTile[]
   score: number
@@ -70,7 +72,10 @@ export function newGame(init: Init): Game {
   const seed = stringToSeed(init.seed)
   const randomGenerator: RandomGenerator = prand.xoroshiro128plus(seed)
 
-  const grid: Tile[][] = R.times(() => R.times(() => emptyTile, width), height)
+  // Create a one-dimensional grid of size width * height
+  const grid: Tile[] = R.times(() => emptyTile, width * height)
+
+  // Choose a set of distinct cell indices in the grid
   chooseCount(randomGenerator, trees, R.range(0, width * height)).forEach(
     (i) => {
       const x = i % width
@@ -80,15 +85,17 @@ export function newGame(init: Init): Game {
         config.tree.height.max,
         randomGenerator,
       )
-      grid[x][y] = { type: "tree", height: tallness }
+      const index = x + y * width
+      grid[index] = { type: "tree", height: tallness }
     },
   )
 
-  return { grid, score: calculateScore(grid) }
+  return { grid, width, height, score: calculateScore(grid, width, height) }
 }
 
 export function planAction(state: Game, action: Action): Game {
-  const targetTile = getTile(state.grid, action.position)
+  // Note: getTile now needs the grid, the target position, and the grid width.
+  const targetTile = getTile(state.width, state.grid, action.position)
   switch (targetTile.type) {
     case "empty":
       return { ...state, plan: action }
@@ -100,24 +107,35 @@ export function planAction(state: Game, action: Action): Game {
       }
     case "log":
       console.log("log")
-      // TODO: Implement
+      // TODO: Implement log handling
       return { ...state, plan: action }
   }
 }
 
-function calculateScore(_grid: Tile[][]): number {
-  return 0 // TODO: Implement
+function calculateScore(
+  _grid: Tile[],
+  _width: number,
+  _height: number,
+): number {
+  // TODO: Implement score calculation logic.
+  return 0
 }
 // Info functions
 // not directly related to the game, but might be useful in a way that the internal helper functions are not
 
 export function present(game: Game): string {
-  const lines = R.map(
-    R.pipe(R.reverse, R.map(presentTile), R.join("")),
-    game.grid,
-  )
-  const gridBlock = R.join("\n", lines)
-  return `Score: ${game.score}\n${gridBlock}`
+  const { grid, width, height, score } = game
+  const rows: string[] = []
+  // Since north is positive y, print from top row (y = height - 1) down to 0.
+  for (let y = height - 1; y >= 0; y--) {
+    let row = ""
+    for (let x = 0; x < width; x++) {
+      const index = x + y * width
+      row += presentTile(grid[index])
+    }
+    rows.push(row)
+  }
+  return `Score: ${score}\n${rows.join("\n")}`
 }
 
 function presentTile(tile: Tile): string {
@@ -144,9 +162,9 @@ export function offsetXFromDirection(direction: Direction): number {
 
 export function offsetYFromDirection(direction: Direction): number {
   switch (direction) {
-    case "S":
-      return 1
     case "N":
+      return 1
+    case "S":
       return -1
     default:
       return 0
@@ -164,10 +182,25 @@ export function positionFromDirection(
   ]
 }
 
-export function getTile(grid: Tile[][], position: Position): Tile {
-  const [x, y] = position
-  return grid[x][y]
-}
+export const indexFromPosition = R.curry(
+  (width: number, coordinate: Position): number => {
+    const [x, y] = coordinate
+    return x + y * width
+  },
+)
+
+export const positionFromIndex = R.curry(
+  (width: number, index: number): Position => {
+    const x = index % width
+    const y = Math.floor(index / width)
+    return [x, y]
+  },
+)
+
+export const getTile = R.curry(
+  (width: number, grid: Tile[], position: Position): Tile =>
+    grid[indexFromPosition(width, position)],
+)
 
 // Helper functions
 
@@ -209,14 +242,15 @@ function chopTree(
       position: pos,
     })
   }
+  // The first predicted tile represents the chopped (empty) tree base.
   return [{ tile: emptyTile, position }, ...log]
 }
 
-// random number functions
+// Random number functions
+
 /**
  * Convert a string into a 32-bit integer seed.
- * This example uses a simple sdbm-like hash,
- * though many approaches would work.
+ * This example uses a simple sdbm-like hash.
  */
 function stringToSeed(str: string) {
   let h = 0
@@ -233,10 +267,9 @@ function chooseCount<T>(rng: RandomGenerator, count: number, arr: T[]): T[] {
 
   // Fisher–Yates shuffle
   for (let i = copy.length - 1; i > 0; i--) {
-    // pick a random j in [0..i]
+    // Pick a random j in [0..i]
     const j = prand.unsafeUniformIntDistribution(0, i, rng)
-
-    // swap elements at positions i and j
+    // Swap elements at positions i and j
     ;[copy[i], copy[j]] = [copy[j], copy[i]]
   }
 

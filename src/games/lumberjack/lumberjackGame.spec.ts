@@ -5,22 +5,33 @@ import * as game from "./lumberjackGame"
 describe("lumberjackGame", () => {
   it("should create a new game", () => {
     const state = game.newGame({
-      seed: "test",
+      seed: "42",
       width: 3,
       height: 3,
       trees: 3,
     })
 
-    // console.log(JSON.stringify(state))
-    // return
-    // Abusing seeded random number generator to make test deterministic
+    expect(game.present(state)).toEqual(
+      `Score: 0
+52.
+5..
+...`,
+    )
+
     expect(state).toEqual({
       grid: [
-        // < S ---- N >  Array literals are in the wrong orientation for the grid
-        [{ type: "empty" }, { type: "tree", height: 5 }, { type: "empty" }], // ^ W
-        [{ type: "empty" }, { type: "tree", height: 5 }, { type: "empty" }], // |
-        [{ type: "empty" }, { type: "tree", height: 2 }, { type: "empty" }], // v E
+        { type: "empty" },
+        { type: "empty" },
+        { type: "empty" },
+        { type: "tree", height: 5 },
+        { type: "empty" },
+        { type: "empty" },
+        { type: "tree", height: 5 },
+        { type: "tree", height: 2 },
+        { type: "empty" },
       ],
+      width: 3,
+      height: 3,
       score: 0,
     })
   })
@@ -39,40 +50,56 @@ describe("lumberjackGame", () => {
     // console.log(game.present(state))
 
     expect(state.score).toBe(0)
+    expect(state.width).toBe(width)
+    expect(state.height).toBe(height)
+    expect(state.grid.length).toBe(width * height)
 
-    expect(state.grid.length).toBe(width)
-    state.grid.forEach((row) => {
-      expect(row.length).toBe(height)
-    })
-
-    const allTiles = state.grid.flat()
-    const treeTiles = allTiles.filter((t) => t.type === "tree")
+    const treeTiles = state.grid.filter((t) => t.type === "tree")
     expect(treeTiles.length).toBe(trees)
 
     treeTiles.forEach((tile) => {
-      // We know tile.type === "tree" here, so cast or check
       const treeTile = tile as game.TreeTile
       expect(treeTile.height).toBeGreaterThanOrEqual(2)
       expect(treeTile.height).toBeLessThanOrEqual(6)
     })
 
-    const nonTreeTiles = allTiles.filter((t) => t.type !== "tree")
+    const nonTreeTiles = state.grid.filter((t) => t.type !== "tree")
     expect(nonTreeTiles.every((t) => t.type === "empty")).toBe(true)
   })
 
+  // The sample state is now defined using a flat grid.
+  // Recall: index = x + y * width, with y = 0 at the bottom.
+  // For a 3x3 grid, we build the flat grid so that present() prints:
+  // top row (y = 2): .5.
+  // middle row (y = 1): .5.
+  // bottom row (y = 0): ..2
   const sampleState: game.Game = {
     grid: [
-      [{ type: "empty" }, { type: "tree", height: 5 }, { type: "empty" }],
-      [{ type: "empty" }, { type: "tree", height: 5 }, { type: "empty" }],
-      [{ type: "tree", height: 2 }, { type: "empty" }, { type: "empty" }],
+      // Row 0 (bottom row, y = 0)
+      { type: "empty" },
+      { type: "empty" },
+      { type: "tree", height: 2 },
+      // Row 1 (middle row, y = 1)
+      { type: "empty" },
+      { type: "tree", height: 5 },
+      { type: "empty" },
+      // Row 2 (top row, y = 2)
+      { type: "empty" },
+      { type: "tree", height: 5 },
+      { type: "empty" },
     ],
+    width: 3,
+    height: 3,
     score: 0,
   }
 
   it("should predict a chop", () => {
+    // Plan an action on the tile at [2, 0] (x=2, y=0).
+    // In sampleState, index = 2 + 0*3 = 2 contains { type: "tree", height: 2 }
     const action = game.action("W", [2, 0])
     const state = game.planAction(sampleState, action)
 
+    // The grid remains unchanged.
     expect({ ...state, prediction: undefined, plan: undefined }).toEqual(
       sampleState,
     )
