@@ -65,6 +65,9 @@ const config = {
       max: 6,
     },
   },
+  log: {
+    doublePoints: 3,
+  },
 }
 
 export function newGame(init: Init): Game {
@@ -90,7 +93,7 @@ export function newGame(init: Init): Game {
     },
   )
 
-  return { grid, width, height, score: calculateScore(grid, width, height) }
+  return calculateScore({ grid, width, height, score: 0 })
 }
 
 export function planAction(state: Game, action: Action): Game {
@@ -111,15 +114,132 @@ export function planAction(state: Game, action: Action): Game {
       return { ...state, plan: action }
   }
 }
-
-function calculateScore(
-  _grid: Tile[],
-  _width: number,
-  _height: number,
-): number {
-  // TODO: Implement score calculation logic.
-  return 0
+export function executeAction(state: Game, action: Action): Game {
+  const targetTile = getTile(state.width, state.grid, action.position)
+  switch (targetTile.type) {
+    case "empty":
+      return state
+    case "tree": {
+      const prediction = chopTree(targetTile, action)
+      const newGrid = [...state.grid]
+      prediction.forEach(({ tile, position }) => {
+        newGrid[indexFromPosition(state.width, position)] = tile
+      })
+      return calculateScore({
+        ...state,
+        grid: newGrid,
+        prediction: undefined,
+        plan: undefined,
+      })
+    }
+    case "log":
+      // TODO: Implement log handling
+      return state
+  }
 }
+
+function calculateScore(game: Game): Game {
+  let toVisit: number[] = R.range(0, game.grid.length)
+  let score = 0
+  while (toVisit.length > 0) {
+    const index: number = toVisit.pop()!
+    const logIndices: number[] = findLog(game, index)
+    score += logIndices.length
+    toVisit = R.without(logIndices, toVisit)
+  }
+  return { ...game, score }
+}
+
+function findLog(game: Game, index: number): number[] {
+  const logTile = game.grid[index]
+  if (logTile.type !== "log") {
+    return []
+  }
+  const log: number[] = [index]
+  const searchDirection = (
+    validOrientations: LogOrientation[],
+    dx: number,
+    dy: number,
+  ): void => {
+    let [x, y] = positionFromIndex(game.width, index)
+    // The first tile is already added.
+    x += dx
+    y += dy
+    while (x >= 0 && x < game.width && y >= 0 && y < game.height) {
+      const newIndex = indexFromPosition(game.width, [x, y])
+      if (game.grid[newIndex].type === "log") {
+        const newLogTile = game.grid[newIndex] as LogTile
+        if (validOrientations.includes(newLogTile.orientation)) {
+          log.push(newIndex)
+        } else {
+          return
+        }
+      } else {
+        return
+      }
+      x += dx
+      y += dy
+    }
+  }
+
+  switch (logTile.orientation) {
+    case "N":
+      searchDirection(
+        ["NS", "S"],
+        offsetXFromDirection("N"),
+        offsetYFromDirection("N"),
+      )
+      break
+    case "S":
+      searchDirection(
+        ["NS", "N"],
+        offsetXFromDirection("S"),
+        offsetYFromDirection("S"),
+      )
+      break
+    case "E":
+      searchDirection(
+        ["EW", "W"],
+        offsetXFromDirection("E"),
+        offsetYFromDirection("E"),
+      )
+      break
+    case "W":
+      searchDirection(
+        ["EW", "E"],
+        offsetXFromDirection("W"),
+        offsetYFromDirection("W"),
+      )
+      break
+    case "NS":
+      searchDirection(
+        ["NS", "S"],
+        offsetXFromDirection("N"),
+        offsetYFromDirection("N"),
+      )
+
+      searchDirection(
+        ["NS", "N"],
+        offsetXFromDirection("S"),
+        offsetYFromDirection("S"),
+      )
+      break
+    case "EW":
+      searchDirection(
+        ["EW", "W"],
+        offsetXFromDirection("E"),
+        offsetYFromDirection("E"),
+      )
+      searchDirection(
+        ["EW", "E"],
+        offsetXFromDirection("W"),
+        offsetYFromDirection("W"),
+      )
+      break
+  }
+  return log
+}
+
 // Info functions
 // not directly related to the game, but might be useful in a way that the internal helper functions are not
 
@@ -145,7 +265,20 @@ function presentTile(tile: Tile): string {
     case "tree":
       return tile.height.toString()
     case "log":
-      return "L"
+      switch (tile.orientation) {
+        case "N":
+          return "v"
+        case "S":
+          return "^"
+        case "E":
+          return "<"
+        case "W":
+          return ">"
+        case "NS":
+          return "|"
+        case "EW":
+          return "-"
+      }
   }
 }
 

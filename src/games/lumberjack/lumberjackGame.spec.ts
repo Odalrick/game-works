@@ -95,7 +95,6 @@ describe("lumberjackGame", () => {
 
   it("should predict a chop", () => {
     // Plan an action on the tile at [2, 0] (x=2, y=0).
-    // In sampleState, index = 2 + 0*3 = 2 contains { type: "tree", height: 2 }
     const action = game.action("W", [2, 0])
     const state = game.planAction(sampleState, action)
 
@@ -123,12 +122,25 @@ describe("lumberjackGame", () => {
   it("should present the game state in a human readable format", () => {
     const presentation = game.present(sampleState)
 
-    // TODO: present logs
     expect(presentation).toEqual(
       `Score: 0
 .5.
 .5.
 ..2`,
     )
+  })
+
+  it("should chop a tree", () => {
+    const action = game.action("W", [2, 0])
+    const newState = game.executeAction(sampleState, action)
+
+    expect(game.present(newState)).toEqual(
+      `Score: 2
+.5.
+.5.
+<>.`,
+    )
+
+    expect(newState.score).toBe(2)
   })
 })
