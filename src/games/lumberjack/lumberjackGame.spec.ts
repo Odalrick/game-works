@@ -103,7 +103,7 @@ describe("lumberjackGame", () => {
       sampleState,
     )
     expect(state.plan).toEqual(action)
-    expect(state.prediction).toEqual([
+    expect(state.prediction?.tiles).toEqual([
       { tile: { type: "empty" }, position: [2, 0] },
       { tile: { type: "log", orientation: "W" }, position: [1, 0] },
       { tile: { type: "log", orientation: "E" }, position: [0, 0] },
@@ -142,5 +142,151 @@ describe("lumberjackGame", () => {
     )
 
     expect(newState.score).toBe(2)
+  })
+
+  it("should predict a blocked chop, but set error", () => {
+    const action = game.action("N", [1, 1])
+    const state = game.planAction(sampleState, action)
+
+    expect(state.plan).toEqual(action)
+    expect(state.prediction?.tiles).toEqual([
+      { tile: { type: "empty" }, position: [1, 1] },
+      { tile: { type: "log", orientation: "N" }, position: [1, 2] },
+      {
+        position: [1, 3],
+        tile: {
+          orientation: "NS",
+          type: "log",
+        },
+      },
+      {
+        position: [1, 4],
+        tile: {
+          orientation: "NS",
+          type: "log",
+        },
+      },
+      {
+        position: [1, 5],
+        tile: {
+          orientation: "NS",
+          type: "log",
+        },
+      },
+      {
+        position: [1, 6],
+        tile: {
+          orientation: "S",
+          type: "log",
+        },
+      },
+    ])
+    expect(state.prediction?.valid).toBe("invalid")
+  })
+
+  it("should not chop a blocked tree", () => {
+    const action = game.action("N", [1, 1])
+    const newState = game.executeAction(sampleState, action)
+
+    expect(game.present(newState)).toEqual(
+      `Score: 0
+.5.
+.5.
+..2`,
+    )
+  })
+
+  it("should allow chopping trees to out of bounds", () => {
+    const action = game.action("W", [1, 1])
+    const newState = game.executeAction(sampleState, action)
+
+    expect(game.present(newState)).toEqual(
+      `Score: 1
+.5.
+>..
+..2`,
+    )
+  })
+  it("should fell in sequence", () => {
+    const finalState = [
+      game.action("W", [2, 0]),
+      game.action("E", [1, 1]),
+      game.action("S", [1, 2]),
+    ].reduce(game.executeAction, sampleState)
+
+    expect(game.present(finalState)).toEqual(
+      `Score: 4
+...
+.^<
+<|.`,
+    )
+  })
+
+  describe("large sample state", () => {
+    const largeSampleState: game.Game = game.newGame({
+      seed: "large!!!",
+      width: 10,
+      height: 10,
+      trees: 25,
+    })
+    it("should present the game state in a human readable format", () => {
+      const presentation = game.present(largeSampleState)
+
+      expect(presentation).toEqual(
+        `Score: 0
+........6.
+32......63
+.......253
+..5.32....
+........3.
+3....4.25.
+5.........
+...2.....3
+.5..4.35..
+.2.......5`,
+      )
+    })
+    it("should double points for long logs", () => {
+      const finalState = [game.action("W", [8, 9])].reduce(
+        game.executeAction,
+        largeSampleState,
+      )
+
+      expect(game.present(finalState)).toEqual(
+        `Score: 12
+..<---->..
+32......63
+.......253
+..5.32....
+........3.
+3....4.25.
+5.........
+...2.....3
+.5..4.35..
+.2.......5`,
+      )
+    })
+
+    it("should fell in sequence", () => {
+      const finalState = [
+        game.action("W", [8, 9]),
+        game.action("W", [8, 8]),
+        game.action("N", [8, 7]),
+      ].reduce(game.executeAction, largeSampleState)
+
+      expect(game.present(finalState)).toEqual(
+        `Score: 26
+..<---->|.
+32<---->v3
+.......2.3
+..5.32....
+........3.
+3....4.25.
+5.........
+...2.....3
+.5..4.35..
+.2.......5`,
+      )
+    })
   })
 })

@@ -36,12 +36,19 @@ export interface PredictedTile {
   position: Position
 }
 
+export type PredictionValidation = "valid" | "invalid"
+
+export interface Prediction {
+  valid: PredictionValidation
+  tiles: PredictedTile[]
+}
+
 export type Game = {
   grid: Tile[] // one-dimensional array
   width: number
   height: number
   plan?: Action
-  prediction?: PredictedTile[]
+  prediction?: Prediction
   score: number
 }
 
@@ -106,7 +113,7 @@ export function planAction(state: Game, action: Action): Game {
       return {
         ...state,
         plan: action,
-        prediction: chopTree(targetTile, action),
+        prediction: validateChop(state, chopTree(targetTile, action)),
       }
     case "log":
       console.log("log")
@@ -114,6 +121,42 @@ export function planAction(state: Game, action: Action): Game {
       return { ...state, plan: action }
   }
 }
+
+function validateChop(
+  state: Game,
+  predictedTiles: PredictedTile[],
+): Prediction {
+  const valid = predictedTiles.every(({ position, tile }) => {
+    switch (tile.type) {
+      case "empty":
+        return true
+      case "tree":
+        throw new Error(
+          "Tree tile should not be present in predicted tiles for a chop",
+        )
+      case "log":
+        if (outOfBounds(state, position)) {
+          return true // Out of bounds is valid
+        }
+        switch (getTile(state.width, state.grid, position).type) {
+          case "tree":
+            // cannot fell a tree onto another tree
+            return false
+          case "log":
+            // log is felled onto and destroyed
+            return true
+          case "empty":
+            // log is felled onto empty space
+            return true
+        }
+    }
+  })
+    ? "valid"
+    : "invalid"
+
+  return { valid, tiles: predictedTiles }
+}
+
 export function executeAction(state: Game, action: Action): Game {
   const targetTile = getTile(state.width, state.grid, action.position)
   switch (targetTile.type) {
@@ -121,9 +164,14 @@ export function executeAction(state: Game, action: Action): Game {
       return state
     case "tree": {
       const prediction = chopTree(targetTile, action)
+      if (validateChop(state, prediction).valid === "invalid") {
+        return state
+      }
       const newGrid = [...state.grid]
       prediction.forEach(({ tile, position }) => {
-        newGrid[indexFromPosition(state.width, position)] = tile
+        if (!outOfBounds(state, position)) {
+          newGrid[indexFromPosition(state.width, position)] = tile
+        }
       })
       return calculateScore({
         ...state,
@@ -144,7 +192,8 @@ function calculateScore(game: Game): Game {
   while (toVisit.length > 0) {
     const index: number = toVisit.pop()!
     const logIndices: number[] = findLog(game, index)
-    score += logIndices.length
+    const multiplier = logIndices.length >= config.log.doublePoints ? 2 : 1
+    score += logIndices.length * multiplier
     toVisit = R.without(logIndices, toVisit)
   }
   return { ...game, score }
@@ -333,6 +382,17 @@ export const positionFromIndex = R.curry(
 export const getTile = R.curry(
   (width: number, grid: Tile[], position: Position): Tile =>
     grid[indexFromPosition(width, position)],
+)
+
+export const outOfBounds = R.curry(
+  <T extends { width: number; height: number }>(
+    dimensions: T,
+    position: Position,
+  ): boolean => {
+    const { width, height } = dimensions
+    const [x, y] = position
+    return x < 0 || x >= width || y < 0 || y >= height
+  },
 )
 
 // Helper functions
