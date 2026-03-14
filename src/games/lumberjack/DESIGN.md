@@ -9,28 +9,22 @@ A tile may contain one of:
 * empty ground
 * standing tree
 * placed log
-* possibly destroyed/scrap tile, depending on final rules
 
 ### Tree data
 
-Each tree should at minimum have:
+Each tree has:
 
-* `position`
-* `height`
-* optional `type`
+* `position` (derived from grid index)
+* `height` (2–6)
 
 ### Log representation
 
-A log should likely be represented as a distinct entity rather than only a set of filled tiles, because rolling requires
-selecting and moving a whole log.
+Logs are stored as individual tiles with an orientation (N, S, E, W, NS, EW). The orientation encodes which end of the
+log a tile is, or whether it is an interior segment. Contiguous same-axis log tiles form a single logical log for
+scoring.
 
-Suggested log data:
-
-* `id`
-* `origin tree id`
-* `length`
-* `orientation`
-* `occupied tiles`
+Rolling will require identifying a whole log from its tiles. The current tile-based representation supports this through
+adjacency search.
 
 ---
 
@@ -41,16 +35,17 @@ On each turn, the player performs one action.
 ### Cut tree
 
 * Select a standing tree
-* Choose a direction
+* Choose a cardinal direction (N, S, E, W)
 * The tree falls in that direction
-* It creates a straight log occupying a number of tiles equal to its height
+* It creates a straight log occupying tiles equal to its height
+* The tree's original tile becomes empty
 
 ### Roll log
 
 * Select an existing placed log
 * Move it one tile in a chosen direction if legal
 * This costs the same as cutting a tree
-* It is intended as an expensive correction/optimization action, not routine play
+* It is intended as an expensive correction/optimisation action, not routine play
 
 Rolling exists to:
 
@@ -60,11 +55,7 @@ Rolling exists to:
 
 ### End condition
 
-The game ends when:
-
-* time runs out, or
-* action budget runs out, or
-* there are no worthwhile remaining moves
+The game ends when the action budget runs out or the player chooses to stop.
 
 ---
 
@@ -75,225 +66,116 @@ When a tree is cut:
 * it is removed as a standing tree
 * a log of length equal to tree height is placed in the selected direction
 
-Open rule questions that need playtesting:
+### Collision with existing logs
 
-1. **What happens on overlap with existing logs?**
+Felling a tree onto an existing log destroys the overlapping tiles of the existing log. The incoming log is placed
+normally. This makes space management important — careless cuts degrade earlier work.
 
-    * overlap destroys the incoming log tiles
-    * overlap destroys the existing tiles
-    * overlap destroys both / creates scrap
-    * cut is simply illegal
-2. **What happens if the fall would leave the board?**
+### Collision with standing trees
 
-    * illegal move
-    * truncated log
-    * wasted cut
+A tree cannot be felled onto another standing tree. The cut is invalid.
 
-Current design direction suggests that collision consequences should matter, because the game becomes more interesting
-if space management is important.
+### Out-of-bounds fall
+
+A tree can be felled towards the board edge. Log tiles that would land outside the grid are simply lost. The remaining
+portion is placed normally. This means felling a short tree near an edge is safe, but felling a tall tree towards a
+nearby edge wastes most of its length.
 
 ---
 
 ## Scoring
 
-### Core scoring intent
+The prototype supports two selectable scoring modes. Both reward long logs, but they create different strategic
+incentives.
 
-Long logs should be worth disproportionately more than short logs.
+### Mode A: Threshold bonus (current default)
 
-This is one of the central strategic drivers:
+* Score per log = length
+* Logs of length 3+: score = length × 2
 
-* preserving space for tall trees should matter
-* breaking up the board into many short placements should feel inferior
+The player sees "keep logs long" as the obvious goal. Collisions that break existing logs are purely destructive.
 
-### Scoring candidates discussed
+### Mode B: Log count bonus
 
-#### Option A — Exponential weighting
+* Score per log-tile = 1
+* Bonus per log of length 3+: +3
 
-Example:
+This rewards having *more* logs. A well-placed collision that splits an existing long log into two shorter-but-still-long
+logs can be optimal — the player gains a +3 bonus for the new log at the cost of some tiles. This makes deliberate
+crashing a viable tactic rather than always a mistake.
 
-* score of a log = `1.3^(length - 1)`
+### Strategic difference
 
-This strongly rewards longer logs.
+* Mode A: protect existing logs at all costs, maximise unbroken length
+* Mode B: sometimes sacrifice length to create additional qualifying logs
 
-**Insight:**
-This captures the intended value curve well, but may be less legible to players and harder to tune intuitively.
+The threshold (length 3+) is configurable in both modes (`config.log.doublePoints`).
 
-#### Option B — Simple threshold bonus
+### Fictional context
 
-Example:
-
-* logs of length 1–2: normal value
-* logs of length 3+: doubled value
-
-This is easier to understand and introduces clear strategy without complexity.
-
-**Insight:**
-This may be preferable if the game should be immediately readable by players. It sacrifices some elegance for clarity.
-
-### Recommendation
-
-Prototype both:
-
-* one with exponential scoring
-* one with threshold/double scoring
-
-Then compare:
-
-* whether players naturally understand the scoring
-* whether tall-tree prioritization feels strong enough
-* whether the game produces interesting tradeoffs
+Different scoring modes let the same minigame express different jobs. An oak camp cutting timber for ship keels wants the
+longest possible logs — mode A. A pine camp producing planks of a certain length rewards precut logs of the right size —
+mode B. The mechanics stay the same; the scoring tells the player what the job values.
 
 ---
 
-## Difficulty Scaling
+## Prototype Sliders
 
-The minigame scales well through board generation and rules.
+This prototype exists to test how the minigame feels, not to integrate with a parent game. Two sliders stand in for the
+eventual integration points:
 
-### Natural scaling axes
+### Difficulty
+
+Controls board generation parameters:
 
 * grid size
 * number of trees
 * tree height distribution
-* density of tree placement
-* tree types, if used
 
-### Observed insight
+Higher difficulty means a denser, more constrained board with harder planning decisions.
 
-This game's difficulty mostly comes from **combinatorial planning pressure**, not input complexity.
-That is a good fit for a minigame replacing a skill roll, because it makes player decisions matter without requiring
-twitch mechanics.
+### Skill
 
----
-
-## Character Skill Integration
-
-Character skill should make the game easier **without replacing the gameplay**.
-
-### Strong candidate: action cost reduction
-
-Base rule example:
-
-* each action costs 10 minutes
-
-Higher lumberjack skill:
-
-* reduces time cost per cut/roll
-* gives more total effective actions within the same work session
-
-This is a strong fit because it:
-
-* preserves the puzzle
-* does not trivialize good planning
-* allows skilled characters to exploit more opportunities
-
-### Why this works
-
-It satisfies the design requirement that character skill should be a **handicap reduction**, not simply "make the puzzle
-easier" by removing challenge.
-
-Possible later additions:
-
-* preview fall path
-* limited undo
-* reduced penalties for mistakes
-
-But action-time reduction is already sufficient and elegant.
-
----
-
-## Use Cases
-
-### Use case 1: replace a lumberjack skill check
-
-Instead of:
-
-* "roll lumberjack, get X wood"
-
-Use:
-
-* play the minigame
-* resulting score determines wood yield / quality / profit
-
-### Use case 2: reward player mastery beyond character stats
-
-A skilled player can outperform expectations through:
-
-* efficient sequencing
-* preserving long placements
-* minimizing need for rolls
-
-### Use case 3: let character skill still matter
-
-A skilled character gets:
-
-* more actions in the same work period
-* better capacity to convert player skill into result
-
-### Use case 4: scalable content
-
-Different jobs can be generated by varying:
-
-* board size
-* forest density
-* height profile
-* available time
-
-This makes the minigame reusable in multiple contexts.
+Controls the action budget. A higher skill setting gives more actions within the same session. This mirrors the intended
+character-skill integration (where a skilled lumberjack works faster), without needing an actual character system.
 
 ---
 
 ## Implementation Priorities
 
-## Phase 1: core prototype
+### Phase 1: core prototype (done)
 
-Implement:
+* Grid with seeded random tree placement
+* Tree heights (2–6)
+* Cut action with directional felling
+* Log orientation model
+* Prediction system (plan action → preview → validate → execute)
+* Collision rules (destroys existing logs, blocked by trees, truncated out of bounds)
+* Threshold scoring
+* Text-based `present()` for testing
 
-* grid
-* random tree placement
-* tree heights
-* cut action
-* directional falling
-* placed logs
-* simple legal/illegal collision rules
-* end condition
-* score calculation
+### Phase 2: rolling
 
-Goal:
+* Identify whole log from tile adjacency
+* Roll action: move entire log one tile in a chosen direction
+* Full action cost (same as cut)
+* Movement legality (blocked by trees, board edge, other logs)
 
-* verify whether the core puzzle is fun before adding complexity
+### Phase 3: action budget and end condition
 
-## Phase 2: rolling
+* Configurable action budget
+* Game-over state when budget is exhausted or player stops
+* Wire up the skill slider to control the budget
 
-Add:
+### Phase 4: UI
 
-* selectable logs
-* roll action
-* full action/time cost
-* basic movement legality
-
-Goal:
-
-* test whether rolling adds meaningful planning depth rather than tedious cleanup
-
-## Phase 3: scoring experiments
-
-Implement switchable scoring modes:
-
-* exponential
-* threshold bonus
-
-Goal:
-
-* compare readability and strategic incentives
-
-## Phase 4: progression/scaling
-
-Add:
-
-* more varied tree distributions
-* larger boards
-* optional special tree types
-* tighter time budgets
+* Visual grid with clickable tiles
+* Tree and log rendering
+* Action selection (click tree → choose direction)
+* Prediction overlay (show where the log will land before confirming)
+* Score display
+* Difficulty and skill sliders
+* New game / reset
 
 ---
 
@@ -301,59 +183,28 @@ Add:
 
 ### 1. The real game is sequencing
 
-The most important part is not "can I place this tree?" but:
-
-* in what order should I solve the forest?
-* when is it correct to spend a whole action on repositioning?
+The most important decisions are about order: which tree to cut first, which direction preserves space for later cuts.
 
 ### 2. Rolling is valuable because it is expensive
 
-Rolling only works if it is costly enough to feel like a deliberate sacrifice.
-That cost is what creates strategic tension.
+Rolling only works if it is costly enough to feel like a deliberate sacrifice. That cost is what creates strategic
+tension.
 
 ### 3. Long-log incentives are the heart of the puzzle
 
-Without a strong reward for long logs, the game risks collapsing into generic space filling.
-The scoring model must strongly favor preserving room for tall trees.
+Without a strong reward for long logs, the game risks collapsing into generic space filling. The scoring model must
+strongly favour preserving room for tall trees.
 
 ### 4. Simplicity of rules matters
 
-The game's natural depth comes from the board state.
-Because of that, secondary rules should stay as simple and legible as possible, especially in the first version.
-
-### 5. Character skill should buy opportunity, not solve the puzzle
-
-Reducing time per action is a particularly good fit because it keeps the player playing the same game, just with more
-room to perform well.
+The game's natural depth comes from the board state. Secondary rules should stay as legible as possible.
 
 ---
 
 ## Open Questions for Playtesting
 
-These should be resolved by testing, not theory alone:
-
-* Are collisions more fun as illegal moves or destructive outcomes?
-* Should out-of-bounds falls be illegal or partially wasted?
 * Does rolling one tile at a time feel good, or too fiddly?
-* Does exponential scoring feel satisfying or opaque?
-* Does threshold bonus scoring create enough incentive for tall trees?
 * What board sizes produce meaningful decisions without becoming tedious?
 * How often should a good player need to roll logs?
-
----
-
-## Minimal Ruleset Recommendation
-
-For the first playable version:
-
-* square grid
-* random trees with heights
-* cut in 4 directions
-* illegal if placement would overlap or go out of bounds
-* score = sum of log values
-* use either:
-    * exponential value by length, or
-    * simple doubled score for length 3+
-* each action costs time
-* higher lumberjack skill reduces time cost
-* add rolling only after confirming the cut-only puzzle is fun
+* Is the threshold bonus enough incentive, or should the multiplier or threshold be adjusted?
+* What distribution of trees produce a compelling game loop?
