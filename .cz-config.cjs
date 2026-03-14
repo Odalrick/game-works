@@ -32,7 +32,7 @@ module.exports = {
   scopes: [
     { name: "basics" },
     { name: "flip-game" },
-    { name: "lumberjack-game" },
+    { name: "lumberjack" },
     { name: "wordle" },
   ],
 }
