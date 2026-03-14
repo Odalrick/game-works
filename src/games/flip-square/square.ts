@@ -41,12 +41,8 @@ export function getCell(grid: Grid, x: number, y: number): CellState {
   return grid[indexFromCoordinate([x, y])]
 }
 
-export const presentCoordinate = (c: Coordinate): string =>
-  `(${c[0]}, ${c[1]})`
-export const presentCoordinates = R.pipe(
-  R.map(presentCoordinate),
-  R.join(", "),
-)
+export const presentCoordinate = (c: Coordinate): string => `(${c[0]}, ${c[1]})`
+export const presentCoordinates = R.pipe(R.map(presentCoordinate), R.join(", "))
 
 export function gridAsString(grid: Grid): string {
   return R.pipe(

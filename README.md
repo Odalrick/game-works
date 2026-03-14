@@ -27,9 +27,7 @@ The 'Square' tool provides a smart solver for this puzzle game. It takes the cur
 - **TypeScript**: For adding type safety to the project, enhancing code reliability and maintainability.
 - Additional tools/libraries used in the project (like Jest for testing, Ramda for functional utilities, etc.).
 
-
 Certainly! Your perspective on the use of solvers in puzzle games, especially regarding the distinction between creating such tools and merely using them, is an important aspect to highlight. Here's an updated section that incorporates your specific views:
-
 
 ## Ethical Considerations: The Use of Solvers in Puzzle Games
 
@@ -38,45 +36,52 @@ Certainly! Your perspective on the use of solvers in puzzle games, especially re
 The creation and use of puzzle games solvers serve dual roles - educational enhancement and potential aids in gameplay.
 
 #### As a Creator
+
 - **Not Cheating for the Creator**: I believe that using a solver I've created is not cheating, as long as it the game being played doesn't forbid use of tools, explicitly or implicitly. The process of creating such a tool involves deep understanding and engagement with the game’s mechanics, which is a rewarding challenge in itself.
 - **A Source of Entertainment**: For me, the act of creating a solver is often more engaging and entertaining than playing the puzzle itself. It's an exercise in problem-solving, programming, and algorithmic thinking.
 
 #### As a User
+
 - **Cheating in Single-Player Games**: If you're using a solver without having developed it yourself, it can be considered cheating. However, in single-player games, the use of such tools is a personal choice. It is acceptable to use them to bypass parts of the game you find tedious or to enhance your personal gaming experience, as long as it doesn't diminish your enjoyment.
 - **Fair Play in Multiplayer Settings**: In multiplayer or competitive settings, the use of solvers should align with the game's rules and the spirit of fair play.
-
 
 ## Future Enhancements
 
 This project is an ongoing journey of learning and development, with many possibilities for future enhancements. Below are some of the ideas I'm considering, in no particular order:
 
 ### Internationalization and Localization (i18n and l10n)
+
 - Implementing support for multiple languages to make the app more accessible to a global audience.
 - Adding localization features to tailor the app to different cultural contexts.
 
 ### UI/UX Improvements
+
 - Redesigning the interface to enhance visual appeal and user experience.
 - Implementing responsive design to ensure a seamless experience across various devices.
 - I'm not a designer so the goal here is "not make people's eyes bleed".
 
 ### Battleship Game
+
 - Developing a Battleship game, which could include strategies for efficient guessing and tracking opponent moves.
 
 ### Wordle Solver
+
 - Creating a solver for the popular word game Wordle, using algorithms to predict the best guesses based on previous inputs.
 
 ### Sudoku Solver
+
 - Building a Sudoku puzzle solver, which could involve complex algorithms to handle various levels of puzzle difficulty.
 - Would probably start as a tool to help solve Sudoku puzzles, rather than actually solving them.
 
 ### Enhancements to Square
+
 - Introducing additional rules for the Square game, such as varying the number of states a square can have and different grid sizes.
 - Modifying the flip mechanics to include different patterns or more complex interactions between squares.
 
 ### Optimization of Square Solver
+
 - Improving the current Square solver algorithm to handle larger grids and more complex scenarios efficiently.
 - Exploring different algorithmic approaches or heuristics to enhance performance.
-
 
 ## Utilization of AI in Development
 
