@@ -63,6 +63,10 @@ const wordleSlice = createSlice({
         savePreviouslyCorrect([...state.previouslyCorrect])
       }
     },
+    setPreviouslyCorrect(state, action: PayloadAction<string[]>) {
+      state.previouslyCorrect = action.payload
+      savePreviouslyCorrect(action.payload)
+    },
     reset(state) {
       state.guesses = []
       state.questRule = { type: "none" }
