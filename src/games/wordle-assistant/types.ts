@@ -14,5 +14,5 @@ export type GuessRecord = {
 export type QuestRule =
   | { type: "none" }
   | { type: "endsWith"; letter: string }
-  | { type: "maxLetter"; letter: string; count: number }
-  | { type: "minLetter"; letter: string; count: number }
+  | { type: "avoid"; letter: string }
+  | { type: "use"; letter: string }

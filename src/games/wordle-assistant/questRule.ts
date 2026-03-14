@@ -6,13 +6,9 @@ export function satisfiesRule(word: string, rule: QuestRule): boolean {
       return true
     case "endsWith":
       return word.endsWith(rule.letter)
-    case "maxLetter": {
-      const count = word.split("").filter((c) => c === rule.letter).length
-      return count <= rule.count
-    }
-    case "minLetter": {
-      const count = word.split("").filter((c) => c === rule.letter).length
-      return count >= rule.count
-    }
+    case "avoid":
+      return !word.includes(rule.letter)
+    case "use":
+      return word.includes(rule.letter)
   }
 }
