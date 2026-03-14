@@ -1,9 +1,9 @@
 import { describe, expect, it } from "@jest/globals"
 
-import { letterFrequencies, rankWander } from "./ranker"
+import { letterFrequencies, rankSeek, rankWander } from "./ranker"
 import { GuessRecord, TileState } from "./types"
 
-const { WHITE } = TileState
+const { YELLOW, WHITE } = TileState
 
 describe("letterFrequencies", () => {
   it("should compute per-position letter frequency from a word pool", () => {
@@ -38,5 +38,28 @@ describe("rankWander", () => {
     ]
     const ranked = rankWander(pool, guesses, pool)
     expect(ranked.indexOf("bland")).toBeLessThan(ranked.indexOf("bleed"))
+  })
+})
+
+describe("rankSeek", () => {
+  it("should return all candidates ranked by frequency when all guessed letters are white", () => {
+    const candidates = ["blind", "cloud", "guild"]
+    const guesses: GuessRecord[] = [
+      { word: "stare", feedback: [WHITE, WHITE, WHITE, WHITE, WHITE] },
+    ]
+    const ranked = rankSeek(candidates, guesses, candidates)
+    expect(ranked).toHaveLength(3)
+    expect(ranked).toEqual(expect.arrayContaining(["blind", "cloud", "guild"]))
+  })
+
+  it("should rank words that place yellow letters in new positions", () => {
+    const candidates = ["dance", "notch"]
+    const guesses: GuessRecord[] = [
+      { word: "given", feedback: [WHITE, WHITE, WHITE, WHITE, YELLOW] },
+    ]
+    const ranked = rankSeek(candidates, guesses, candidates)
+    // Both place n in a new position (not position 4), so both should be returned
+    expect(ranked).toContain("dance")
+    expect(ranked).toContain("notch")
   })
 })
