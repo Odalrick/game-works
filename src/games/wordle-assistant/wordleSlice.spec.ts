@@ -116,12 +116,11 @@ describe("wordle slice", () => {
     it("should overwrite a previous quest rule", () => {
       const state = reducer(
         reducer(undefined, setQuestRule({ type: "endsWith", letter: "s" })),
-        setQuestRule({ type: "maxLetter", letter: "e", count: 1 }),
+        setQuestRule({ type: "avoid", letter: "e" }),
       )
       expect(state.questRule).toEqual({
-        type: "maxLetter",
+        type: "avoid",
         letter: "e",
-        count: 1,
       })
     })
   })

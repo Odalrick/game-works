@@ -100,7 +100,9 @@ export function rankWander(
   referencePool: string[],
 ): string[] {
   const tested = testedLetters(guesses)
-  const frequency = overallLetterFrequency(referencePool)
+  const frequency = overallLetterFrequency(
+    referencePool.length > 0 ? referencePool : pool,
+  )
   const greens = greenPositions(guesses)
 
   return [...pool].sort((a, b) => {
@@ -215,6 +217,7 @@ export function rankQuest(
   referencePool: string[],
   candidates: string[],
 ): string[] {
+  if (rule.type === "none") return []
   const compliant = pool.filter((word) => satisfiesRule(word, rule))
   const tested = testedLetters(guesses)
   const frequency = overallLetterFrequency(referencePool)

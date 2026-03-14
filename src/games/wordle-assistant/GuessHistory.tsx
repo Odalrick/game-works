@@ -39,36 +39,42 @@ const GuessHistory: React.FC<GuessHistoryProps> = ({
 
   return (
     <div className="guess-history">
-      {guesses.map((guess, guessIndex) => (
-        <div className="guess-row" key={guessIndex}>
-          <input
-            type="radio"
-            name="editable-guess"
-            checked={editableIndex === guessIndex}
-            onChange={() => onEditableChange(guessIndex)}
-            className="guess-radio"
-          />
-          {guess.word.split("").map((letter, position) => (
-            <Tile
-              key={position}
-              letter={letter}
-              state={guess.feedback[position]}
-              onClick={() => onCycleTile(guessIndex, position)}
-              locked={editableIndex !== guessIndex}
+      <h4>Guesses</h4>
+      <div className="guess-history-body">
+        {guesses.length === 0 && (
+          <p className="guess-empty">No guesses yet — type a word below.</p>
+        )}
+        {guesses.map((guess, guessIndex) => (
+          <div className="guess-row" key={guessIndex}>
+            <input
+              type="radio"
+              name="editable-guess"
+              checked={editableIndex === guessIndex}
+              onChange={() => onEditableChange(guessIndex)}
+              className="guess-radio"
             />
-          ))}
-        </div>
-      ))}
-      <form onSubmit={handleSubmit} className="guess-input">
-        <input
-          type="text"
-          value={inputWord}
-          onChange={(event) => onInputChange(event.target.value)}
-          maxLength={5}
-          placeholder="Type a word..."
-        />
-        <button type="submit">Add</button>
-      </form>
+            {guess.word.split("").map((letter, position) => (
+              <Tile
+                key={position}
+                letter={letter}
+                state={guess.feedback[position]}
+                onClick={() => onCycleTile(guessIndex, position)}
+                locked={editableIndex !== guessIndex}
+              />
+            ))}
+          </div>
+        ))}
+        <form onSubmit={handleSubmit} className="guess-input">
+          <input
+            type="text"
+            value={inputWord}
+            onChange={(event) => onInputChange(event.target.value)}
+            maxLength={5}
+            placeholder="Type a word..."
+          />
+          <button type="submit">Add</button>
+        </form>
+      </div>
     </div>
   )
 }

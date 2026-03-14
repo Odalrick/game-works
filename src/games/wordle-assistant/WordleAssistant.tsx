@@ -18,31 +18,54 @@ const feedbackChar: Record<TileState, string> = {
   [TileState.WHITE]: ".",
 }
 
-function serialiseGameState(state: WordleState): string {
-  const lines: string[] = []
-  for (const guess of state.guesses) {
+interface SuggestionLists {
+  wander: string[]
+  seek: string[]
+  quest: string[]
+  candidates: string[]
+}
+
+function serialiseGameState(
+  state: WordleState,
+  suggestions: SuggestionLists,
+): string {
+  const sections: string[] = []
+
+  const guessLines = state.guesses.map((guess) => {
     const feedback = guess.feedback.map((tile) => feedbackChar[tile]).join("")
-    lines.push(`${guess.word.toUpperCase()} ${feedback}`)
+    return `${guess.word.toUpperCase()} ${feedback}`
+  })
+  if (guessLines.length > 0) {
+    sections.push(guessLines.join("\n"))
   }
+
   if (state.questRule.type !== "none") {
-    lines.push("")
-    if (state.questRule.type === "endsWith") {
-      lines.push(`Quest: ends with ${state.questRule.letter.toUpperCase()}`)
-    } else if (state.questRule.type === "maxLetter") {
-      lines.push(
-        `Quest: max ${
-          state.questRule.count
-        } of ${state.questRule.letter.toUpperCase()}`,
-      )
-    } else if (state.questRule.type === "minLetter") {
-      lines.push(
-        `Quest: min ${
-          state.questRule.count
-        } of ${state.questRule.letter.toUpperCase()}`,
-      )
-    }
+    const label =
+      state.questRule.type === "endsWith"
+        ? `ends with ${state.questRule.letter.toUpperCase()}`
+        : state.questRule.type === "avoid"
+          ? `avoid ${state.questRule.letter.toUpperCase()}`
+          : `use ${state.questRule.letter.toUpperCase()}`
+    sections.push(`Quest: ${label}`)
   }
-  return lines.join("\n")
+
+  const listSection = (title: string, words: string[]) => {
+    const display = words.slice(0, 10).map((w) => w.toUpperCase())
+    return `${title}: ${display.join(", ")}`
+  }
+
+  const lists = [
+    listSection("Wander", suggestions.wander),
+    listSection("Seek", suggestions.seek),
+    listSection("Quest", suggestions.quest),
+    listSection(
+      `Candidates (${suggestions.candidates.length})`,
+      suggestions.candidates,
+    ),
+  ]
+  sections.push(lists.join("\n"))
+
+  return sections.join("\n\n")
 }
 
 const Legend: React.FC = () => (
@@ -180,8 +203,12 @@ const WordleAssistant: React.FC<WordleAssistantProps> = ({ state, action }) => {
         </button>
         <button onClick={() => action(actions.reset())}>Reset</button>
         <button
-          onClick={handleOpenSettings}
-          className="settings-button"
+          onClick={() =>
+            settingsOpen ? setSettingsOpen(false) : handleOpenSettings()
+          }
+          className={`settings-button${
+            settingsOpen ? " settings-button-active" : ""
+          }`}
           title="Settings"
         >
           &#9881;
@@ -202,12 +229,14 @@ const WordleAssistant: React.FC<WordleAssistantProps> = ({ state, action }) => {
           </div>
           <h4>Game state</h4>
           <textarea
-            value={serialiseGameState(state)}
+            value={serialiseGameState(state, {
+              wander,
+              seek,
+              quest,
+              candidates,
+            })}
             readOnly
-            rows={Math.max(
-              3,
-              state.guesses.length + (state.questRule.type !== "none" ? 2 : 0),
-            )}
+            rows={10}
             className="settings-textarea"
             onClick={(event) => (event.target as HTMLTextAreaElement).select()}
           />

@@ -19,11 +19,11 @@ const QuestRuleSelector: React.FC<QuestRuleSelectorProps> = ({
       case "endsWith":
         onChange({ type: "endsWith", letter: "a" })
         break
-      case "maxLetter":
-        onChange({ type: "maxLetter", letter: "a", count: 1 })
+      case "avoid":
+        onChange({ type: "avoid", letter: "a" })
         break
-      case "minLetter":
-        onChange({ type: "minLetter", letter: "a", count: 1 })
+      case "use":
+        onChange({ type: "use", letter: "a" })
         break
     }
   }
@@ -34,8 +34,8 @@ const QuestRuleSelector: React.FC<QuestRuleSelectorProps> = ({
       <select value={rule.type} onChange={handleTypeChange}>
         <option value="none">None</option>
         <option value="endsWith">Ends with</option>
-        <option value="maxLetter">Max of letter</option>
-        <option value="minLetter">Min of letter</option>
+        <option value="avoid">Avoid letter</option>
+        <option value="use">Use letter</option>
       </select>
       {rule.type !== "none" && (
         <>
@@ -48,24 +48,6 @@ const QuestRuleSelector: React.FC<QuestRuleSelectorProps> = ({
               onChange({ ...rule, letter: event.target.value.toLowerCase() })
             }
             className="quest-letter-input"
-          />
-        </>
-      )}
-      {(rule.type === "maxLetter" || rule.type === "minLetter") && (
-        <>
-          <label> count: </label>
-          <input
-            type="number"
-            min={0}
-            max={5}
-            value={rule.count}
-            onChange={(event) =>
-              onChange({
-                ...rule,
-                count: parseInt(event.target.value, 10) || 0,
-              })
-            }
-            className="quest-count-input"
           />
         </>
       )}

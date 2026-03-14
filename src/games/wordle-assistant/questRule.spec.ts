@@ -14,15 +14,15 @@ describe("satisfiesRule", () => {
     expect(satisfiesRule("crane", rule)).toBe(false)
   })
 
-  it("checks maxLetter rule", () => {
-    const rule: QuestRule = { type: "maxLetter", letter: "e", count: 1 }
-    expect(satisfiesRule("crane", rule)).toBe(true)
-    expect(satisfiesRule("eerie", rule)).toBe(false)
+  it("checks avoid rule — word must not contain the letter", () => {
+    const rule: QuestRule = { type: "avoid", letter: "a" }
+    expect(satisfiesRule("stone", rule)).toBe(true)
+    expect(satisfiesRule("crane", rule)).toBe(false)
   })
 
-  it("checks minLetter rule", () => {
-    const rule: QuestRule = { type: "minLetter", letter: "e", count: 2 }
-    expect(satisfiesRule("crane", rule)).toBe(false)
-    expect(satisfiesRule("eerie", rule)).toBe(true)
+  it("checks use rule — word must contain the letter", () => {
+    const rule: QuestRule = { type: "use", letter: "e" }
+    expect(satisfiesRule("crane", rule)).toBe(true)
+    expect(satisfiesRule("awful", rule)).toBe(false)
   })
 })
