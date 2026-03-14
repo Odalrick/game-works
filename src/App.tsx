@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { RootState } from "./store"
 import Square from "./games/flip-square/Square"
+import WordleAssistant from "./games/wordle-assistant/WordleAssistant"
 import "./App.css"
 
 enum Tab {
@@ -12,6 +13,7 @@ enum Tab {
 function App() {
   const [activeTab, setActiveTab] = useState(Tab.FLIP_SQUARE)
   const square = useSelector((state: RootState) => state.square)
+  const wordle = useSelector((state: RootState) => state.wordle)
   const dispatch = useDispatch()
 
   return (
@@ -34,7 +36,9 @@ function App() {
         {activeTab === Tab.FLIP_SQUARE && (
           <Square square={square} action={dispatch} />
         )}
-        {activeTab === Tab.WORDLE && <p>Wordle assistant coming soon.</p>}
+        {activeTab === Tab.WORDLE && (
+          <WordleAssistant state={wordle} action={dispatch} />
+        )}
       </div>
     </div>
   )
