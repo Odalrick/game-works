@@ -75,9 +75,7 @@ describe("grid functions", () => {
       const square = createSquare(scrambled)
 
       indexFlips.forEach((doFlip) => {
-        expect(
-          shouldFlip(square, ...coordinateFromIndex(doFlip)),
-        ).toBeTruthy()
+        expect(shouldFlip(square, ...coordinateFromIndex(doFlip))).toBeTruthy()
       })
     })
   }

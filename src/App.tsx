@@ -34,9 +34,7 @@ function App() {
         {activeTab === Tab.FLIP_SQUARE && (
           <Square square={square} action={dispatch} />
         )}
-        {activeTab === Tab.WORDLE && (
-          <p>Wordle assistant coming soon.</p>
-        )}
+        {activeTab === Tab.WORDLE && <p>Wordle assistant coming soon.</p>}
       </div>
     </div>
   )
