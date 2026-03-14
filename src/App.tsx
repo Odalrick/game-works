@@ -1,15 +1,43 @@
+import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { RootState } from "./store"
 import Square from "./games/flip-square/Square"
 import "./App.css"
 
+enum Tab {
+  FLIP_SQUARE = "FLIP_SQUARE",
+  WORDLE = "WORDLE",
+}
+
 function App() {
+  const [activeTab, setActiveTab] = useState(Tab.FLIP_SQUARE)
   const square = useSelector((state: RootState) => state.square)
   const dispatch = useDispatch()
 
   return (
     <div className="App">
-      <Square square={square} action={dispatch} />
+      <nav className="tabs">
+        <button
+          className={activeTab === Tab.FLIP_SQUARE ? "tab active" : "tab"}
+          onClick={() => setActiveTab(Tab.FLIP_SQUARE)}
+        >
+          Flip Square
+        </button>
+        <button
+          className={activeTab === Tab.WORDLE ? "tab active" : "tab"}
+          onClick={() => setActiveTab(Tab.WORDLE)}
+        >
+          Wordle
+        </button>
+      </nav>
+      <div className="tab-content">
+        {activeTab === Tab.FLIP_SQUARE && (
+          <Square square={square} action={dispatch} />
+        )}
+        {activeTab === Tab.WORDLE && (
+          <p>Wordle assistant coming soon.</p>
+        )}
+      </div>
     </div>
   )
 }
