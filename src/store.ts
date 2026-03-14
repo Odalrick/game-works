@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit"
 import squareSlice from "@games/flip-square/squareSlice"
+import wordleSlice from "@games/wordle-assistant/wordleSlice"
 
 const store = configureStore({
   reducer: {
     square: squareSlice,
+    wordle: wordleSlice,
   },
 })
 
