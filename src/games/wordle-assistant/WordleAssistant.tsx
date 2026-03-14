@@ -4,11 +4,60 @@ import type { Action } from "./wordleSlice"
 import { actions } from "./wordleSlice"
 import { deriveConstraints, filterCandidates } from "./inference"
 import { rankWander, rankSeek, rankQuest } from "./ranker"
+import { TileState } from "./types"
+import { tileColours, tileLabels } from "./tileConstants"
 import wordList from "./wordList.json"
 import GuessHistory from "./GuessHistory"
 import QuestRuleSelector from "./QuestRuleSelector"
 import SuggestionPanels from "./SuggestionPanels"
 import "./wordle.css"
+
+const feedbackChar: Record<TileState, string> = {
+  [TileState.GREEN]: "g",
+  [TileState.YELLOW]: "o",
+  [TileState.WHITE]: ".",
+}
+
+function serialiseGameState(state: WordleState): string {
+  const lines: string[] = []
+  for (const guess of state.guesses) {
+    const feedback = guess.feedback.map((tile) => feedbackChar[tile]).join("")
+    lines.push(`${guess.word.toUpperCase()} ${feedback}`)
+  }
+  if (state.questRule.type !== "none") {
+    lines.push("")
+    if (state.questRule.type === "endsWith") {
+      lines.push(`Quest: ends with ${state.questRule.letter.toUpperCase()}`)
+    } else if (state.questRule.type === "maxLetter") {
+      lines.push(
+        `Quest: max ${
+          state.questRule.count
+        } of ${state.questRule.letter.toUpperCase()}`,
+      )
+    } else if (state.questRule.type === "minLetter") {
+      lines.push(
+        `Quest: min ${
+          state.questRule.count
+        } of ${state.questRule.letter.toUpperCase()}`,
+      )
+    }
+  }
+  return lines.join("\n")
+}
+
+const Legend: React.FC = () => (
+  <div className="tile-legend">
+    {[TileState.GREEN, TileState.YELLOW, TileState.WHITE].map((tileState) => (
+      <span key={tileState} className="legend-item">
+        <span
+          className="legend-swatch"
+          style={{ backgroundColor: tileColours[tileState] }}
+        />
+        {tileLabels[tileState]}
+      </span>
+    ))}
+  </div>
+)
 
 interface WordleAssistantProps {
   state: WordleState
@@ -95,6 +144,7 @@ const WordleAssistant: React.FC<WordleAssistantProps> = ({ state, action }) => {
 
   return (
     <div className="wordle-assistant">
+      <Legend />
       <GuessHistory
         guesses={state.guesses}
         editableIndex={activeEditableIndex}
@@ -150,6 +200,17 @@ const WordleAssistant: React.FC<WordleAssistantProps> = ({ state, action }) => {
             <button onClick={handleStoreSettings}>Store</button>
             <button onClick={() => setSettingsOpen(false)}>Cancel</button>
           </div>
+          <h4>Game state</h4>
+          <textarea
+            value={serialiseGameState(state)}
+            readOnly
+            rows={Math.max(
+              3,
+              state.guesses.length + (state.questRule.type !== "none" ? 2 : 0),
+            )}
+            className="settings-textarea"
+            onClick={(event) => (event.target as HTMLTextAreaElement).select()}
+          />
         </div>
       )}
     </div>

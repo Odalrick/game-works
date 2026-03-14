@@ -4,11 +4,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #d3d6da;
+  border: 2px solid var(--border);
   font-weight: bold;
   font-size: 1.2rem;
   cursor: pointer;
   user-select: none;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .wordle-tile-locked {
@@ -25,6 +27,7 @@
 
 .guess-radio {
   margin-right: 4px;
+  accent-color: var(--green-glow);
 }
 
 .guess-input {
@@ -39,6 +42,37 @@
   letter-spacing: 0.3rem;
   text-transform: uppercase;
   width: 13rem;
+}
+
+.quest-rule-selector {
+  margin-top: 1rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background-color: var(--green-faint);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.quest-rule-selector label:first-child {
+  font-weight: 600;
+  color: var(--green-glow);
+}
+
+.quest-letter-input {
+  width: 2rem;
+  text-align: center;
+  font-size: 1rem;
+  text-transform: uppercase;
+  padding: 0.2rem;
+}
+
+.quest-count-input {
+  width: 3rem;
+  text-align: center;
+  font-size: 1rem;
+  padding: 0.2rem;
 }
 
 .suggestion-panels {
@@ -57,6 +91,7 @@
 
 .word-list h4 {
   margin: 0 0 0.5rem 0;
+  color: var(--green-glow);
 }
 
 .word-list ul {
@@ -75,7 +110,7 @@
 }
 
 .word-list-item:hover {
-  background-color: #e8e8e8;
+  background-color: var(--green-faint);
 }
 
 .wordle-controls {
@@ -98,12 +133,17 @@
 .settings-panel {
   margin-top: 1rem;
   padding: 1rem;
-  border: 1px solid #d3d6da;
+  border: 1px solid var(--border);
   border-radius: 4px;
 }
 
 .settings-panel h4 {
   margin: 0 0 0.5rem 0;
+  color: var(--green-glow);
+}
+
+.settings-panel h4:not(:first-child) {
+  margin-top: 1rem;
 }
 
 .settings-textarea {
@@ -117,4 +157,24 @@
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
+}
+
+.tile-legend {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.legend-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
 }

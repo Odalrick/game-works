@@ -8,7 +8,7 @@
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 0.5rem;
 }
 
@@ -23,7 +23,7 @@
 
 .tab.active {
   opacity: 1;
-  border-bottom: 2px solid #646cff;
+  border-bottom: 2px solid var(--green-glow);
 }
 
 .square .grid {
@@ -38,7 +38,7 @@
 }
 
 .square .grid-row .cell {
-  border: 1px solid black;
+  border: 1px solid var(--border);
   margin: 1px;
   cursor: pointer;
   user-select: none;
