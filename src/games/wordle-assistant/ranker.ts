@@ -1,5 +1,6 @@
-import type { GuessRecord } from "./types"
+import type { GuessRecord, QuestRule } from "./types"
 import { TileState } from "./types"
+import { satisfiesRule } from "./questRule"
 
 export function letterFrequencies(
   pool: string[],
@@ -168,6 +169,62 @@ export function rankSeek(
     return (
       scoreSeek(b, tested, frequency, yellows) -
       scoreSeek(a, tested, frequency, yellows)
+    )
+  })
+}
+
+function scoreQuest(
+  word: string,
+  tested: Set<string>,
+  frequency: Map<string, number>,
+  yellows: Map<string, Set<number>>,
+  candidateSet: Set<string>,
+): number {
+  let score = 0
+
+  for (let position = 0; position < word.length; position++) {
+    const letter = word[position]
+    const letterFrequency = frequency.get(letter) ?? 0
+
+    // Reward placing yellow letters in new positions
+    const yellowPositionsForLetter = yellows.get(letter)
+    if (yellowPositionsForLetter && !yellowPositionsForLetter.has(position)) {
+      score += letterFrequency * 3
+    }
+
+    // Reward untested high-frequency letters
+    if (!tested.has(letter)) {
+      score += letterFrequency * 2
+    } else {
+      score += letterFrequency
+    }
+  }
+
+  // Anti-solving: deprioritise words that are candidate answers
+  if (candidateSet.has(word)) {
+    score -= 1000
+  }
+
+  return score
+}
+
+export function rankQuest(
+  pool: string[],
+  guesses: GuessRecord[],
+  rule: QuestRule,
+  referencePool: string[],
+  candidates: string[],
+): string[] {
+  const compliant = pool.filter((word) => satisfiesRule(word, rule))
+  const tested = testedLetters(guesses)
+  const frequency = overallLetterFrequency(referencePool)
+  const yellows = yellowPositions(guesses)
+  const candidateSet = new Set(candidates)
+
+  return compliant.sort((a, b) => {
+    return (
+      scoreQuest(b, tested, frequency, yellows, candidateSet) -
+      scoreQuest(a, tested, frequency, yellows, candidateSet)
     )
   })
 }
