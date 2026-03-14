@@ -50,8 +50,12 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
-button:hover {
+button:hover:not(:disabled) {
   border-color: var(--border-bright);
+}
+button:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 button:focus,
 button:focus-visible {

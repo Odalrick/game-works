@@ -188,6 +188,7 @@ const WordleAssistant: React.FC<WordleAssistantProps> = ({ state, action }) => {
         seek={seek}
         quest={quest}
         candidates={candidates}
+        hasGuesses={state.guesses.length > 0}
         previouslyCorrect={state.previouslyCorrect}
         onWordClick={handleWordClick}
       />
