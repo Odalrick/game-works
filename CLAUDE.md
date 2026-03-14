@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What is this?
 
-A React/Redux learning project — a collection of puzzle game solvers and utilities. Currently contains a "Flip Square" (3×3 grid) solver. Deployed to GitHub Pages.
+A React/Redux learning project — a collection of puzzle game solvers and utilities. Deployed to GitHub Pages.
 
 ## Commands
 
@@ -20,21 +20,22 @@ A React/Redux learning project — a collection of puzzle game solvers and utili
 - **Vite** + **React 18** + **TypeScript** (strict mode), transpiled with SWC
 - **Redux Toolkit** for state management — single store in `src/store.ts`
 - **Ramda** for functional utilities
-- Games live under `src/games/` — currently only `flip-square/`
+- Games live under `src/games/` — each has its own README and DESIGN doc
+- `src/MINIGAME.md` defines what counts as a minigame in this project's design framework
 - Path alias: `@games` → `src/games/` (configured in both `tsconfig.json` and `vite.config.ts`; mapped in `jest.config.cjs`)
 - GitHub Pages deployment serves from the `docs/` directory with base path `/game-works/`
 
-### Flip Square game
+### Games
 
-- `squareSlice.ts` — Redux slice (state, reducers, solver logic)
-- `squareSlice.spec.ts` — Unit tests for the slice
-- `Square.tsx` / `Grid.tsx` — UI components
+- **Flip Square** (`flip-square/`) — 3×3 grid solver. Redux slice + UI components.
+- **Wordle Assistant** (`wordle-assistant/`) — helper for Wordle-like puzzles. Three suggestion strategies (wander, seek, quest).
+- **Lumberjack** (`lumberjack/`) — spatial planning minigame prototype. Core game logic with tests, no UI yet.
 
 ## Conventions
 
 ### Commits
 
-Conventional commits via Commitizen (`npm run commit`). Current scopes: `flip-game`, `basics` (defined in `.cz-config.cjs`).
+Conventional commits via Commitizen (`npm run commit`). Current scopes: `basics`, `flip-game`, `lumberjack`, `wordle` (defined in `.cz-config.cjs`).
 
 ### Formatting
 
