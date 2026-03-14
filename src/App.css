@@ -1,3 +1,31 @@
+.App {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+}
+
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #444;
+    padding-bottom: 0.5rem;
+}
+
+.tab {
+    background: none;
+    border: none;
+    padding: 0.4rem 1rem;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+    opacity: 0.6;
+}
+
+.tab.active {
+    opacity: 1;
+    border-bottom: 2px solid #646cff;
+}
+
 .square .grid {
     display: flex;
     flex-direction: column;

@@ -33,6 +33,6 @@ module.exports = {
     { name: "basics" },
     { name: "flip-game" },
     { name: "lumberjack-game" },
-    { name: "wordle-game" },
+    { name: "wordle" },
   ],
 }
