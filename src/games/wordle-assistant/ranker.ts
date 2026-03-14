@@ -109,3 +109,65 @@ export function rankWander(
     )
   })
 }
+
+function yellowPositions(guesses: GuessRecord[]): Map<string, Set<number>> {
+  const yellows = new Map<string, Set<number>>()
+  for (const guess of guesses) {
+    for (let position = 0; position < guess.feedback.length; position++) {
+      if (guess.feedback[position] === TileState.YELLOW) {
+        const letter = guess.word[position]
+        if (!yellows.has(letter)) {
+          yellows.set(letter, new Set())
+        }
+        yellows.get(letter)!.add(position)
+      }
+    }
+  }
+  return yellows
+}
+
+function scoreSeek(
+  word: string,
+  tested: Set<string>,
+  frequency: Map<string, number>,
+  yellows: Map<string, Set<number>>,
+): number {
+  let score = 0
+
+  for (let position = 0; position < word.length; position++) {
+    const letter = word[position]
+    const letterFrequency = frequency.get(letter) ?? 0
+
+    // Reward placing yellow letters in new (untried) positions
+    const yellowPositionsForLetter = yellows.get(letter)
+    if (yellowPositionsForLetter && !yellowPositionsForLetter.has(position)) {
+      score += letterFrequency * 3
+    }
+
+    // Reward untested high-frequency letters
+    if (!tested.has(letter)) {
+      score += letterFrequency * 2
+    } else {
+      score += letterFrequency
+    }
+  }
+
+  return score
+}
+
+export function rankSeek(
+  candidates: string[],
+  guesses: GuessRecord[],
+  referencePool: string[],
+): string[] {
+  const tested = testedLetters(guesses)
+  const frequency = overallLetterFrequency(referencePool)
+  const yellows = yellowPositions(guesses)
+
+  return [...candidates].sort((a, b) => {
+    return (
+      scoreSeek(b, tested, frequency, yellows) -
+      scoreSeek(a, tested, frequency, yellows)
+    )
+  })
+}
