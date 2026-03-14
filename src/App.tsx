@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { RootState } from "./store"
 import Square from "./games/flip-square/Square"
@@ -10,8 +10,17 @@ enum Tab {
   WORDLE = "WORDLE",
 }
 
+const tabTitles: Record<Tab, string> = {
+  [Tab.FLIP_SQUARE]: "Flip Square",
+  [Tab.WORDLE]: "Wordle Assistant",
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState(Tab.FLIP_SQUARE)
+
+  useEffect(() => {
+    document.title = `${tabTitles[activeTab]} - GameWorks`
+  }, [activeTab])
   const square = useSelector((state: RootState) => state.square)
   const wordle = useSelector((state: RootState) => state.wordle)
   const dispatch = useDispatch()

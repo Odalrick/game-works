@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import type { WordleState } from "./wordleSlice"
 import type { Action } from "./wordleSlice"
-import { actions } from "./wordleSlice"
+import { actions, STORAGE_KEY } from "./wordleSlice"
 import { deriveConstraints, filterCandidates } from "./inference"
 import { rankWander, rankSeek, rankQuest } from "./ranker"
 import { TileState } from "./types"
@@ -119,6 +119,20 @@ const WordleAssistant: React.FC<WordleAssistantProps> = ({ state, action }) => {
       rankQuest(allWords, state.guesses, state.questRule, allWords, candidates),
     [allWords, state.guesses, state.questRule, candidates],
   )
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== STORAGE_KEY) return
+      try {
+        const words = event.newValue ? JSON.parse(event.newValue) : []
+        action(actions.setPreviouslyCorrect(words))
+      } catch {
+        /* ignore malformed data */
+      }
+    }
+    window.addEventListener("storage", handleStorage)
+    return () => window.removeEventListener("storage", handleStorage)
+  }, [action])
 
   const [inputWord, setInputWord] = useState("")
   const [editableIndex, setEditableIndex] = useState(-1)
