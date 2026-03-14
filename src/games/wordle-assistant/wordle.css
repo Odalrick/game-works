@@ -10,3 +10,17 @@
   cursor: pointer;
   user-select: none;
 }
+
+.guess-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.guess-input input {
+  font-size: 1rem;
+  padding: 0.4rem;
+  letter-spacing: 0.3rem;
+  text-transform: uppercase;
+  width: 13rem;
+}
