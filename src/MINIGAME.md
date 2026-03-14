@@ -2,7 +2,8 @@
 
 ## Purpose
 
-A minigame is a **self-contained gameplay module** embedded inside a larger game, used to resolve a situation that might otherwise be handled by a simple stat check, roll, or abstract calculation.
+A minigame is a **self-contained gameplay module** embedded inside a larger game, used to resolve a situation that might
+otherwise be handled by a simple stat check, roll, or abstract calculation.
 
 Its job is to:
 
@@ -134,7 +135,55 @@ rather than:
 
 A minigame should feel like a brief but complete play experience.
 
-That does not require it to be long in absolute time, but it should be rich enough that the player feels they **played something**, not merely triggered an animation with timing input.
+That does not require it to be long in absolute time, but it should be rich enough that the player feels they **played
+something**, not merely triggered an animation with timing input.
+
+---
+
+## Enjoyment Requirement
+
+A minigame does **not** have to be strongly fun in isolation.
+
+Because a minigame is:
+
+* embedded in a larger game
+* short in duration
+* context-dependent in meaning
+
+it can justify itself even if its standalone entertainment value is limited.
+
+This distinguishes minigames from full games.
+
+A full game usually must carry the player's interest on its own.
+A minigame can instead succeed by:
+
+* adding texture
+* changing pacing
+* expressing a type of task
+* making a skill check feel less abstract
+* introducing a little agency or variation
+
+So the requirement is not:
+
+> "Is this fully fun as a standalone game?"
+
+but more:
+
+> "Does this add enough value to the surrounding game to justify its presence?"
+
+### Key insight
+
+A minigame may be:
+
+* mildly engaging
+* merely acceptable
+* situationally satisfying
+* even somewhat boring
+
+and still be valid, as long as it serves the parent game well enough.
+
+Of course, a genuinely fun minigame is better.
+But fun is a strong positive, not a strict qualification requirement.
 
 ---
 
@@ -193,6 +242,77 @@ Good scaling often means:
 * **mechanically open enough** to reward mastery
 * **fictionally bounded enough** to stay believable
 
+## Repeat tolerance
+
+Because minigames are often repeated:
+
+* their novelty can wear off
+* their optimal patterns can become obvious
+* their friction can become tiresome
+
+A minigame should therefore be evaluated not only on:
+
+* first-play interest
+* mechanical quality
+
+but also on:
+
+* repeat tolerance
+* how irritating it becomes when mandatory
+* how much it slows the surrounding game loop
+
+Even a decent minigame may degrade over time.
+
+## Skippability
+
+Skippability is not logically required for something to count as a minigame.
+
+However, as a design rule, minigames generally **should be skippable**.
+
+Since minigames:
+
+* may be only moderately enjoyable
+* may become repetitive
+* are subordinate to the larger game
+
+the player should usually have a way to bypass them.
+
+This protects the larger game from being dragged down by:
+
+* repetition
+* pacing friction
+* player fatigue
+* mastery mismatch, where the player understands the system but no longer wants to perform it manually
+
+Treat skippability as a default expectation unless there is a strong reason not to.
+
+Skipping should not necessarily mean "free success." Good skip options may include:
+
+* auto-resolve based on character skill
+* average or conservative outcome
+* reduced reward ceiling
+* lower variance result
+* slower completion
+* inability to achieve top-tier performance
+
+This preserves the value of manual play without forcing repetition.
+
+### Key insight
+
+Manual play should usually offer:
+
+* better ceiling
+* more control
+* more interesting outcomes
+
+Skip should usually offer:
+
+* convenience
+* consistency
+* lower friction
+
+That creates a healthy tradeoff.
+
 ---
 
 ## Game Elements
@@ -245,6 +365,9 @@ When recording a candidate, evaluate it with questions like:
 * What prevents it from becoming trivial?
 * What keeps it fictionally bounded?
 * What parts are game elements, and what part is the actual minigame?
+* How does it hold up after the tenth time?
+* Does it justify its presence even if it is not strongly fun?
+* What happens when the player wants to skip it?
 
 ---
 
@@ -266,6 +389,10 @@ A minigame should justify its existence by adding something a simple roll cannot
 * mastery
 * texture
 * memorable variation
+
+A minigame does not need to be highly fun in isolation. It only needs to add enough value to the larger game to justify
+the attention it demands. Because of that, and because repetition can turn even decent minigames stale, minigames should
+generally be designed with a skip or auto-resolve path.
 
 If it does not add those, it may be better as a normal roll or a lightweight mechanic.
 
@@ -290,7 +417,8 @@ The player is not merely watching a number resolve; they contribute directly.
 
 ## Use case 3: create texture between different activities
 
-Different professions or situations can have distinct play patterns rather than sharing the same abstract roll structure.
+Different professions or situations can have distinct play patterns rather than sharing the same abstract roll
+structure.
 
 ## Use case 4: create mastery space
 
@@ -334,8 +462,15 @@ They just are not full minigames by this definition.
 
 If you want the shortest practical definition:
 
-> A minigame is a self-contained, multi-step gameplay challenge inside the larger game that lets player skill affect a result the parent game can use.
+> A minigame is a self-contained, multi-step gameplay challenge inside the larger game that lets player skill affect a
+> result the parent game can use. It does not need to be highly fun in isolation, but it should justify its presence
+> through context, and should generally be skippable.
 
 And a corresponding companion definition:
 
 > A game element is a mechanic or subsystem that can be part of a minigame, but is not necessarily a minigame by itself.
+
+And a more design-oriented version:
+
+> A minigame is a subordinate gameplay module: valuable not because it must stand alone as a great game, but because it
+> adds agency, texture, and variation to the larger one.
