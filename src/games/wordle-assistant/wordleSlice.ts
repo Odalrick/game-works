@@ -58,10 +58,12 @@ const wordleSlice = createSlice({
       state.questRule = action.payload
     },
     markCorrect(state, action: PayloadAction<string>) {
-      if (!state.previouslyCorrect.includes(action.payload)) {
-        state.previouslyCorrect.push(action.payload)
-        savePreviouslyCorrect([...state.previouslyCorrect])
-      }
+      const stored = loadPreviouslyCorrect()
+      const merged = [
+        ...new Set([...stored, ...state.previouslyCorrect, action.payload]),
+      ]
+      state.previouslyCorrect = merged
+      savePreviouslyCorrect(merged)
     },
     setPreviouslyCorrect(state, action: PayloadAction<string[]>) {
       state.previouslyCorrect = action.payload
@@ -70,10 +72,12 @@ const wordleSlice = createSlice({
     reset(state) {
       state.guesses = []
       state.questRule = { type: "none" }
+      state.previouslyCorrect = loadPreviouslyCorrect()
     },
   },
 })
 
+export { STORAGE_KEY }
 export const { actions } = wordleSlice
 export type Action = ReturnType<(typeof actions)[keyof typeof actions]>
 export default wordleSlice.reducer

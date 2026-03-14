@@ -1,4 +1,14 @@
-import { describe, expect, it } from "@jest/globals"
+import { beforeEach, describe, expect, it } from "@jest/globals"
+
+const storage = new Map<string, string>()
+Object.defineProperty(globalThis, "localStorage", {
+  value: {
+    getItem: (key: string) => storage.get(key) ?? null,
+    setItem: (key: string, value: string) => storage.set(key, value),
+    removeItem: (key: string) => storage.delete(key),
+    clear: () => storage.clear(),
+  },
+})
 
 import reducer, { actions } from "./wordleSlice"
 import { TileState, type GuessRecord } from "./types"
@@ -17,6 +27,10 @@ const makeGuess = (word: string): GuessRecord => ({
 })
 
 describe("wordle slice", () => {
+  beforeEach(() => {
+    storage.clear()
+  })
+
   it("should have correct initial state", () => {
     const state = reducer(undefined, { type: "unknown" })
     expect(state.guesses).toEqual([])
