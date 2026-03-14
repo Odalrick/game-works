@@ -1,9 +1,5 @@
 import React from "react"
-import {
-  Square as SquareModel,
-  Action as SquareAction,
-  actions,
-} from "./squareSlice"
+import { type Square as SquareModel, type Action as SquareAction, actions } from "./squareSlice"
 import Grid from "./Grid"
 
 interface SquareProps {

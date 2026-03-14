@@ -1,5 +1,6 @@
 import React from "react"
-import { CellState, Square as SquareModel } from "./squareSlice"
+import { CellState, getCell, shouldFlip } from "./square"
+import type { Square as SquareModel } from "./squareSlice"
 
 interface GridProps {
   square: SquareModel
@@ -103,9 +104,11 @@ const Grid: React.FC<GridProps> = ({
           {row.map(([x, y]) => (
             <Cell
               key={`${x},${y}`}
-              colour={square.getCell(x, y) === CellState.ON ? "green" : "red"}
+              colour={
+                getCell(square.grid, x, y) === CellState.ON ? "green" : "red"
+              }
               onClick={() => onCellClick(x, y)}
-              shouldFlip={square.shouldFlip(x, y)}
+              shouldFlip={shouldFlip(square, x, y)}
               onAlternateClick={() => onAlternateCellClick(x, y)}
             >
               ({x}, {y})
