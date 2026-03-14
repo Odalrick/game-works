@@ -1,14 +1,8 @@
 import { describe, expect, it } from "@jest/globals"
-
-import reducer, {
-  CellState,
-  actions,
-  indexFromCoordinate,
-  coordinateFromIndex,
-  xoParser,
-} from "./squareSlice"
-import * as square from "./squareSlice"
 import * as R from "ramda"
+
+import reducer, { actions } from "./squareSlice"
+import { CellState, getCell, gridAsString, xoParser } from "./square"
 
 const { setGrid, flip } = actions
 const g = R.pipe(
@@ -17,23 +11,24 @@ const g = R.pipe(
   R.map(R.join("")),
   R.join("\n"),
 )
+
 describe("game reducer", () => {
   it("should start in fulfilled state", () => {
-    const squareState = reducer(undefined, { type: "unknown" })
-    expect(squareState.getCell(0, 0)).toEqual(CellState.ON)
-    expect(squareState.getCell(1, 0)).toEqual(CellState.ON)
-    expect(squareState.getCell(2, 0)).toEqual(CellState.ON)
-    expect(squareState.getCell(0, 1)).toEqual(CellState.ON)
-    expect(squareState.getCell(1, 1)).toEqual(CellState.ON)
-    expect(squareState.getCell(2, 1)).toEqual(CellState.ON)
-    expect(squareState.getCell(0, 2)).toEqual(CellState.ON)
-    expect(squareState.getCell(1, 2)).toEqual(CellState.ON)
-    expect(squareState.getCell(2, 2)).toEqual(CellState.ON)
+    const state = reducer(undefined, { type: "unknown" })
+    expect(getCell(state.grid, 0, 0)).toEqual(CellState.ON)
+    expect(getCell(state.grid, 1, 0)).toEqual(CellState.ON)
+    expect(getCell(state.grid, 2, 0)).toEqual(CellState.ON)
+    expect(getCell(state.grid, 0, 1)).toEqual(CellState.ON)
+    expect(getCell(state.grid, 1, 1)).toEqual(CellState.ON)
+    expect(getCell(state.grid, 2, 1)).toEqual(CellState.ON)
+    expect(getCell(state.grid, 0, 2)).toEqual(CellState.ON)
+    expect(getCell(state.grid, 1, 2)).toEqual(CellState.ON)
+    expect(getCell(state.grid, 2, 2)).toEqual(CellState.ON)
   })
 
   it("should convert to string", () => {
-    const squareState = reducer(undefined, { type: "unknown" })
-    expect(squareState.toString()).toEqual(
+    const state = reducer(undefined, { type: "unknown" })
+    expect(gridAsString(state.grid)).toEqual(
       g(`
       xxx
       xxx
@@ -42,7 +37,7 @@ describe("game reducer", () => {
   })
 
   it("should set state", () => {
-    const squareState = reducer(
+    const state = reducer(
       undefined,
       setGrid(
         xoParser(
@@ -54,7 +49,7 @@ describe("game reducer", () => {
       ),
     )
 
-    expect(squareState.toString()).toEqual(
+    expect(gridAsString(state.grid)).toEqual(
       g(`
       xox
       ooo
@@ -64,7 +59,7 @@ describe("game reducer", () => {
 
   it("should read correct coordinates", () => {
     // The y coordinate goes _up_.
-    const squareState = reducer(
+    const state = reducer(
       undefined,
       setGrid(
         xoParser(
@@ -76,15 +71,15 @@ describe("game reducer", () => {
       ),
     )
 
-    expect(squareState.getCell(0, 0)).toEqual(CellState.ON)
-    expect(squareState.getCell(1, 0)).toEqual(CellState.ON)
-    expect(squareState.getCell(2, 0)).toEqual(CellState.ON)
-    expect(squareState.getCell(0, 1)).toEqual(CellState.OFF)
-    expect(squareState.getCell(1, 1)).toEqual(CellState.OFF)
-    expect(squareState.getCell(2, 1)).toEqual(CellState.OFF)
-    expect(squareState.getCell(0, 2)).toEqual(CellState.ON)
-    expect(squareState.getCell(1, 2)).toEqual(CellState.OFF)
-    expect(squareState.getCell(2, 2)).toEqual(CellState.ON)
+    expect(getCell(state.grid, 0, 0)).toEqual(CellState.ON)
+    expect(getCell(state.grid, 1, 0)).toEqual(CellState.ON)
+    expect(getCell(state.grid, 2, 0)).toEqual(CellState.ON)
+    expect(getCell(state.grid, 0, 1)).toEqual(CellState.OFF)
+    expect(getCell(state.grid, 1, 1)).toEqual(CellState.OFF)
+    expect(getCell(state.grid, 2, 1)).toEqual(CellState.OFF)
+    expect(getCell(state.grid, 0, 2)).toEqual(CellState.ON)
+    expect(getCell(state.grid, 1, 2)).toEqual(CellState.OFF)
+    expect(getCell(state.grid, 2, 2)).toEqual(CellState.ON)
   })
 
   const boards: { input: string; expected: string; flip: [number, number] }[] =
@@ -126,17 +121,17 @@ describe("game reducer", () => {
 
   boards.forEach((board) => {
     it("should flip", () => {
-      const squareState = reducer(
+      const state = reducer(
         reducer(undefined, setGrid(xoParser(board.input))),
         flip(board.flip),
       )
 
-      expect(squareState.toString()).toEqual(g(board.expected))
+      expect(gridAsString(state.grid)).toEqual(g(board.expected))
     })
   })
 
   it("should mark a single square", () => {
-    const squareState = reducer(
+    const state = reducer(
       reducer(
         undefined,
         setGrid(
@@ -149,82 +144,11 @@ describe("game reducer", () => {
       actions.toggle([1, 1]),
     )
 
-    expect(squareState.toString()).toEqual(
+    expect(gridAsString(state.grid)).toEqual(
       g(`
           xox
           oxo
           xxx`),
     )
   })
-})
-
-describe("grid functions", () => {
-  it("should generate the correct order of indices", () => {
-    // The y coordinate goes _up_, but is reversed in the array.
-    expect(
-      R.map(indexFromCoordinate, [
-        [0, 0],
-        [1, 0],
-        [2, 0],
-        [0, 1],
-        [1, 1],
-        [2, 1],
-        [0, 2],
-        [1, 2],
-        [2, 2],
-      ]),
-    ).toEqual([6, 7, 8, 3, 4, 5, 0, 1, 2])
-  })
-
-  it("should generate the correct order of coordinates", () => {
-    expect(R.map(coordinateFromIndex, [6, 7, 8, 3, 4, 5, 0, 1, 2])).toEqual([
-      [0, 0],
-      [1, 0],
-      [2, 0],
-      [0, 1],
-      [1, 1],
-      [2, 1],
-      [0, 2],
-      [1, 2],
-      [2, 2],
-    ])
-  })
-
-  const flipTests = [
-    [1, 3, 4],
-    [0, 2, 3, 4, 5],
-    [1, 4, 5],
-    [0, 1, 4, 6, 7],
-    [0, 1, 2, 3, 5, 6, 7, 8],
-    [1, 2, 4, 7, 8],
-    [3, 4, 7],
-  ]
-
-  for (const indexFlips of flipTests) {
-    const flips: square.Coordinate[] = R.map(
-      square.coordinateFromIndex,
-      indexFlips,
-    )
-    const scrambled = R.reduce(
-      (acc, elem) => square.flipNeighbors(elem, acc),
-      square.solvedGrid,
-      flips,
-    )
-    it(`should solve grid ${square.presentCoordinates(flips)}`, () => {
-      const solution = square.solve(scrambled)
-      indexFlips.forEach((doFlip) => {
-        expect(solution).toContain(doFlip)
-      })
-      expect(solution).toHaveLength(flips.length)
-    })
-    it(`should expose a solved cell method for ${square.presentCoordinates(
-      flips,
-    )}`, () => {
-      const s = new square.Square(scrambled)
-
-      indexFlips.forEach((doFlip) => {
-        expect(s.shouldFlip(...coordinateFromIndex(doFlip))).toBeTruthy()
-      })
-    })
-  }
 })
