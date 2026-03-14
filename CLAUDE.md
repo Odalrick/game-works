@@ -23,12 +23,14 @@ A React/Redux learning project — a collection of puzzle game solvers and utili
 - Games live under `src/games/` — each has its own README and DESIGN doc
 - `src/MINIGAME.md` defines what counts as a minigame in this project's design framework
 - Path alias: `@games` → `src/games/` (configured in both `tsconfig.json` and `vite.config.ts`; mapped in `jest.config.cjs`)
-- GitHub Pages deployment serves from the `docs/` directory with base path `/game-works/`
+- GitHub Pages deployment serves from the `docs/` directory with base path `/game-works/` — rebuild with `npm run pages` before merging
+- Implementation plans live in `plans/` (not `docs/`, which is the Pages build output)
+- Dark theme with terminal-green accents — CSS custom properties defined in `src/index.css` (`--green-glow`, `--border`, etc.)
 
 ### Games
 
 - **Flip Square** (`flip-square/`) — 3×3 grid solver. Redux slice + UI components.
-- **Wordle Assistant** (`wordle-assistant/`) — helper for Wordle-like puzzles. Three suggestion strategies (wander, seek, quest).
+- **Wordle Assistant** (`wordle-assistant/`) — helper for Wordle-like puzzles. Three suggestion strategies (wander, seek, quest). localStorage cross-tab sync for previously correct words. Has its own DESIGN.md with full spec.
 - **Lumberjack** (`lumberjack/`) — spatial planning minigame prototype. Core game logic with tests, no UI yet.
 
 ## Conventions

@@ -2,89 +2,51 @@
 
 ## Introduction
 
-Welcome to my React/Redux Learning Project! The primary aim of this project is to facilitate my learning journey with React and Redux, two powerful tools in the world of web development. Additionally, this repository serves as a compilation of handy tools for various games I enjoy. Through this project, I hope to not only strengthen my understanding of React and Redux but also create a suite of utilities that can enhance the gaming experience for myself and other enthusiasts.
+A React/Redux learning project — a collection of puzzle game solvers and utilities. Built with React 18, Redux Toolkit,
+and TypeScript. Deployed to [GitHub Pages](https://odalrick.github.io/game-works/).
 
-## Project Overview
+The primary aim is to learn React and Redux by building practical tools for games I enjoy. The act of creating a solver
+is often more engaging than playing the puzzle itself — it's an exercise in problem-solving, programming, and
+algorithmic thinking.
 
-At its core, this project is designed as a learning sandbox where I experiment with React's dynamic UI capabilities and Redux's state management prowess. By building practical tools for games, I aim to tackle real-world scenarios, thereby solidifying my grasp of these technologies.
+## Games
 
-## Square: A Puzzle Game Solver
+### Flip Square
 
-One of the key components of this project is 'Square', a solver for a specific puzzle game that many find intriguing and challenging.
+A solver for a 3×3 grid puzzle where each cell can be in one of two states. Clicking a cell flips it and its orthogonal
+neighbours. The goal is to flip all cells to the "good" state. The solver uses BFS to compute the optimal sequence of
+moves.
 
-### What is Square?
+### Wordle Assistant
 
-'Square' is a tool designed to solve puzzles from a particular game that involves a 3x3 grid. Each cell in this grid can be in one of two states, and the objective of the game is to flip all cells to the "good" state. The twist in the game is that every time you click a cell, it and its orthogonal neighbors flip to their alternate states.
+A client-side helper for 5-letter Wordle-like puzzles. Not a solver — the user enters guesses and feedback from their
+game, and the assistant suggests words using three strategies:
 
-### Functionality
+- **Wander** — explore untested letters, weighted by frequency among remaining candidates
+- **Seek** — rank candidate answers by information gain
+- **Quest** — comply with variant side-rules (ends with, avoid letter, use letter) while deprioritising actual answers
 
-The 'Square' tool provides a smart solver for this puzzle game. It takes the current state of the 3x3 grid as input and computes the optimal series of moves (or flips) needed to reach the desired end state where all cells are in the "good" state. This solver is an excellent example of algorithmic problem-solving and showcases the application of Redux for state management in complex logic scenarios.
+Variant-agnostic: works with any Wordle-like game that uses 5-letter words with green/yellow/grey feedback. Special
+rules (like locking found letters) are the user's responsibility.
 
-### Technologies Used
+### Lumberjack
 
-- **React**: For rendering the user interface and handling user interactions.
-- **Redux**: To manage the state of the game, especially the current state of the grid and the computation of moves.
-- **TypeScript**: For adding type safety to the project, enhancing code reliability and maintainability.
-- Additional tools/libraries used in the project (like Jest for testing, Ramda for functional utilities, etc.).
+A spatial planning minigame prototype. Core game logic with tests, no UI yet. Replaces a dice-based skill check with a
+tactical puzzle about chopping and rolling logs on a grid.
 
-Certainly! Your perspective on the use of solvers in puzzle games, especially regarding the distinction between creating such tools and merely using them, is an important aspect to highlight. Here's an updated section that incorporates your specific views:
+## Ethical Considerations
 
-## Ethical Considerations: The Use of Solvers in Puzzle Games
+Creating a solver is not cheating — the process involves deep understanding of the game's mechanics, which is rewarding
+in itself. Using someone else's solver in a single-player game is a personal choice. In multiplayer or competitive
+settings, the use of solvers should align with the game's rules and the spirit of fair play.
 
-### The Dual Role of Game Solvers
+## Future Ideas
 
-The creation and use of puzzle games solvers serve dual roles - educational enhancement and potential aids in gameplay.
+- Battleship game — strategies for efficient guessing and tracking opponent moves
+- Sudoku helper — assist with solving rather than auto-solving
+- Enhancements to Flip Square — varying states, grid sizes, flip patterns
+- Lumberjack UI
 
-#### As a Creator
+## AI in Development
 
-- **Not Cheating for the Creator**: I believe that using a solver I've created is not cheating, as long as it the game being played doesn't forbid use of tools, explicitly or implicitly. The process of creating such a tool involves deep understanding and engagement with the game’s mechanics, which is a rewarding challenge in itself.
-- **A Source of Entertainment**: For me, the act of creating a solver is often more engaging and entertaining than playing the puzzle itself. It's an exercise in problem-solving, programming, and algorithmic thinking.
-
-#### As a User
-
-- **Cheating in Single-Player Games**: If you're using a solver without having developed it yourself, it can be considered cheating. However, in single-player games, the use of such tools is a personal choice. It is acceptable to use them to bypass parts of the game you find tedious or to enhance your personal gaming experience, as long as it doesn't diminish your enjoyment.
-- **Fair Play in Multiplayer Settings**: In multiplayer or competitive settings, the use of solvers should align with the game's rules and the spirit of fair play.
-
-## Future Enhancements
-
-This project is an ongoing journey of learning and development, with many possibilities for future enhancements. Below are some of the ideas I'm considering, in no particular order:
-
-### Internationalization and Localization (i18n and l10n)
-
-- Implementing support for multiple languages to make the app more accessible to a global audience.
-- Adding localization features to tailor the app to different cultural contexts.
-
-### UI/UX Improvements
-
-- Redesigning the interface to enhance visual appeal and user experience.
-- Implementing responsive design to ensure a seamless experience across various devices.
-- I'm not a designer so the goal here is "not make people's eyes bleed".
-
-### Battleship Game
-
-- Developing a Battleship game, which could include strategies for efficient guessing and tracking opponent moves.
-
-### Wordle Solver
-
-- Creating a solver for the popular word game Wordle, using algorithms to predict the best guesses based on previous inputs.
-
-### Sudoku Solver
-
-- Building a Sudoku puzzle solver, which could involve complex algorithms to handle various levels of puzzle difficulty.
-- Would probably start as a tool to help solve Sudoku puzzles, rather than actually solving them.
-
-### Enhancements to Square
-
-- Introducing additional rules for the Square game, such as varying the number of states a square can have and different grid sizes.
-- Modifying the flip mechanics to include different patterns or more complex interactions between squares.
-
-### Optimization of Square Solver
-
-- Improving the current Square solver algorithm to handle larger grids and more complex scenarios efficiently.
-- Exploring different algorithmic approaches or heuristics to enhance performance.
-
-## Utilization of AI in Development
-
-### Embracing AI in Coding
-
-In this project, and in general, I have enthusiastically embraced the use of Artificial Intelligence, throughout the development process.
+I enthusiastically use AI throughout the development process.
