@@ -99,6 +99,16 @@
   padding: 0.2rem;
 }
 
+.no-candidates-warning {
+  margin: 1rem 0 0;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #cc3333;
+  border-radius: 4px;
+  background-color: rgba(204, 51, 51, 0.1);
+  color: #ff6666;
+  font-style: italic;
+}
+
 .suggestion-panels {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;

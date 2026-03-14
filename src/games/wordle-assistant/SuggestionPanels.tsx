@@ -5,6 +5,7 @@ interface SuggestionPanelsProps {
   seek: string[]
   quest: string[]
   candidates: string[]
+  hasGuesses: boolean
   previouslyCorrect: string[]
   onWordClick: (word: string) => void
 }
@@ -37,11 +38,17 @@ const SuggestionPanels: React.FC<SuggestionPanelsProps> = ({
   seek,
   quest,
   candidates,
+  hasGuesses,
   previouslyCorrect,
   onWordClick,
 }) => {
   return (
     <>
+      {hasGuesses && candidates.length === 0 && (
+        <p className="no-candidates-warning">
+          No word matches those constraints. Are you just clicking around?
+        </p>
+      )}
       <div className="suggestion-panels">
         <WordList title="Wander" words={wander} onWordClick={onWordClick} />
         <WordList title="Seek" words={seek} onWordClick={onWordClick} />
