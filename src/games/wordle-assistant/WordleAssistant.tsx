@@ -48,24 +48,63 @@ const WordleAssistant: React.FC<WordleAssistantProps> = ({ state, action }) => {
     [allWords, state.guesses, state.questRule, candidates],
   )
 
-  const [solvedWord, setSolvedWord] = useState("")
+  const [inputWord, setInputWord] = useState("")
+  const [editableIndex, setEditableIndex] = useState(-1)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [settingsText, setSettingsText] = useState("")
 
-  const handleMarkSolved = (event: React.FormEvent) => {
-    event.preventDefault()
-    const word = solvedWord.toLowerCase().trim()
-    if (word.length !== 5) return
-    action(actions.markCorrect(word))
-    setSolvedWord("")
+  const lastGuessIndex = state.guesses.length - 1
+  const activeEditableIndex =
+    editableIndex >= 0 && editableIndex < state.guesses.length
+      ? editableIndex
+      : lastGuessIndex
+
+  const handleWordClick = (word: string) => {
+    navigator.clipboard.writeText(word).catch(() => {
+      /* clipboard may not be available */
+    })
+    setInputWord(word)
+  }
+
+  const handleAddGuess = (guess: Parameters<typeof actions.addGuess>[0]) => {
+    action(actions.addGuess(guess))
+    setEditableIndex(-1)
+  }
+
+  const currentInputWord = inputWord.toLowerCase().trim()
+
+  const handleMarkCorrect = () => {
+    if (currentInputWord.length !== 5) return
+    action(actions.markCorrect(currentInputWord))
+    setInputWord("")
+  }
+
+  const handleOpenSettings = () => {
+    setSettingsText(state.previouslyCorrect.join("\n"))
+    setSettingsOpen(true)
+  }
+
+  const handleStoreSettings = () => {
+    const words = settingsText
+      .split("\n")
+      .map((line) => line.trim().toLowerCase())
+      .filter((line) => line.length === 5)
+    action(actions.setPreviouslyCorrect(words))
+    setSettingsOpen(false)
   }
 
   return (
     <div className="wordle-assistant">
       <GuessHistory
         guesses={state.guesses}
-        onAddGuess={(guess) => action(actions.addGuess(guess))}
+        editableIndex={activeEditableIndex}
+        onEditableChange={setEditableIndex}
+        onAddGuess={handleAddGuess}
         onCycleTile={(index, position) =>
           action(actions.updateFeedback({ index, position }))
         }
+        inputWord={inputWord}
+        onInputChange={setInputWord}
       />
       <QuestRuleSelector
         rule={state.questRule}
@@ -77,20 +116,42 @@ const WordleAssistant: React.FC<WordleAssistantProps> = ({ state, action }) => {
         quest={quest}
         candidates={candidates}
         previouslyCorrect={state.previouslyCorrect}
+        onWordClick={handleWordClick}
       />
       <div className="wordle-controls">
-        <form onSubmit={handleMarkSolved} className="mark-solved">
-          <input
-            type="text"
-            value={solvedWord}
-            onChange={(event) => setSolvedWord(event.target.value)}
-            maxLength={5}
-            placeholder="Answer..."
-          />
-          <button type="submit">Mark solved</button>
-        </form>
+        <button
+          onClick={handleMarkCorrect}
+          disabled={currentInputWord.length !== 5}
+          className="mark-solved-button"
+        >
+          {currentInputWord.length === 5
+            ? `${currentInputWord.toUpperCase()} was correct!`
+            : "Mark solved"}
+        </button>
         <button onClick={() => action(actions.reset())}>Reset</button>
+        <button
+          onClick={handleOpenSettings}
+          className="settings-button"
+          title="Settings"
+        >
+          &#9881;
+        </button>
       </div>
+      {settingsOpen && (
+        <div className="settings-panel">
+          <h4>Previously correct words</h4>
+          <textarea
+            value={settingsText}
+            onChange={(event) => setSettingsText(event.target.value)}
+            rows={10}
+            className="settings-textarea"
+          />
+          <div className="settings-actions">
+            <button onClick={handleStoreSettings}>Store</button>
+            <button onClick={() => setSettingsOpen(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
