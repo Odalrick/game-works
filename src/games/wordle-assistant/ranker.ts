@@ -113,101 +113,23 @@ export function rankWander(
   })
 }
 
-function yellowPositions(guesses: GuessRecord[]): Map<string, Set<number>> {
-  const yellows = new Map<string, Set<number>>()
-  for (const guess of guesses) {
-    for (let position = 0; position < guess.feedback.length; position++) {
-      if (guess.feedback[position] === TileState.YELLOW) {
-        const letter = guess.word[position]
-        if (!yellows.has(letter)) {
-          yellows.set(letter, new Set())
-        }
-        yellows.get(letter)!.add(position)
-      }
-    }
-  }
-  return yellows
-}
-
-function scoreSeek(
-  word: string,
-  tested: Set<string>,
-  frequency: Map<string, number>,
-  yellows: Map<string, Set<number>>,
-): number {
-  let score = 0
-
-  for (let position = 0; position < word.length; position++) {
-    const letter = word[position]
-    const letterFrequency = frequency.get(letter) ?? 0
-
-    // Reward placing yellow letters in new (untried) positions
-    const yellowPositionsForLetter = yellows.get(letter)
-    if (yellowPositionsForLetter && !yellowPositionsForLetter.has(position)) {
-      score += letterFrequency * 3
-    }
-
-    // Reward untested high-frequency letters
-    if (!tested.has(letter)) {
-      score += letterFrequency * 2
-    } else {
-      score += letterFrequency
-    }
-  }
-
-  return score
-}
-
 export function rankSeek(
   candidates: string[],
   guesses: GuessRecord[],
   referencePool: string[],
 ): string[] {
   const tested = testedLetters(guesses)
-  const frequency = overallLetterFrequency(referencePool)
-  const yellows = yellowPositions(guesses)
+  const frequency = overallLetterFrequency(
+    referencePool.length > 0 ? referencePool : candidates,
+  )
+  const greens = greenPositions(guesses)
 
   return [...candidates].sort((a, b) => {
     return (
-      scoreSeek(b, tested, frequency, yellows) -
-      scoreSeek(a, tested, frequency, yellows)
+      scoreWander(b, tested, frequency, greens) -
+      scoreWander(a, tested, frequency, greens)
     )
   })
-}
-
-function scoreQuest(
-  word: string,
-  tested: Set<string>,
-  frequency: Map<string, number>,
-  yellows: Map<string, Set<number>>,
-  candidateSet: Set<string>,
-): number {
-  let score = 0
-
-  for (let position = 0; position < word.length; position++) {
-    const letter = word[position]
-    const letterFrequency = frequency.get(letter) ?? 0
-
-    // Reward placing yellow letters in new positions
-    const yellowPositionsForLetter = yellows.get(letter)
-    if (yellowPositionsForLetter && !yellowPositionsForLetter.has(position)) {
-      score += letterFrequency * 3
-    }
-
-    // Reward untested high-frequency letters
-    if (!tested.has(letter)) {
-      score += letterFrequency * 2
-    } else {
-      score += letterFrequency
-    }
-  }
-
-  // Anti-solving: deprioritise words that are candidate answers
-  if (candidateSet.has(word)) {
-    score -= 1000
-  }
-
-  return score
 }
 
 export function rankQuest(
@@ -221,13 +143,15 @@ export function rankQuest(
   const compliant = pool.filter((word) => satisfiesRule(word, rule))
   const tested = testedLetters(guesses)
   const frequency = overallLetterFrequency(referencePool)
-  const yellows = yellowPositions(guesses)
+  const greens = greenPositions(guesses)
   const candidateSet = new Set(candidates)
 
   return compliant.sort((a, b) => {
-    return (
-      scoreQuest(b, tested, frequency, yellows, candidateSet) -
-      scoreQuest(a, tested, frequency, yellows, candidateSet)
-    )
+    const scoreA = scoreWander(a, tested, frequency, greens)
+    const scoreB = scoreWander(b, tested, frequency, greens)
+    // Anti-solving: deprioritise words that are candidate answers
+    const penaltyA = candidateSet.has(a) ? 1000 : 0
+    const penaltyB = candidateSet.has(b) ? 1000 : 0
+    return scoreB - penaltyB - (scoreA - penaltyA)
   })
 }

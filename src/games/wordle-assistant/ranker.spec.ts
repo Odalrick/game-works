@@ -3,7 +3,7 @@ import { describe, expect, it } from "@jest/globals"
 import { letterFrequencies, rankQuest, rankSeek, rankWander } from "./ranker"
 import { GuessRecord, QuestRule, TileState } from "./types"
 
-const { YELLOW, WHITE } = TileState
+const { GREEN, YELLOW, WHITE } = TileState
 
 describe("letterFrequencies", () => {
   it("should compute per-position letter frequency from a word pool", () => {
@@ -50,6 +50,18 @@ describe("rankSeek", () => {
     const ranked = rankSeek(candidates, guesses, candidates)
     expect(ranked).toHaveLength(3)
     expect(ranked).toEqual(expect.arrayContaining(["blind", "cloud", "guild"]))
+  })
+
+  it("should penalise duplicate letters like wander does", () => {
+    // After SEERS g...., candidates all start with S.
+    // Seek should rank single-S words above multi-S words.
+    const candidates = ["salsa", "snowy", "sassy"]
+    const guesses: GuessRecord[] = [
+      { word: "seers", feedback: [GREEN, WHITE, WHITE, WHITE, WHITE] },
+    ]
+    const ranked = rankSeek(candidates, guesses, candidates)
+    expect(ranked.indexOf("snowy")).toBeLessThan(ranked.indexOf("salsa"))
+    expect(ranked.indexOf("snowy")).toBeLessThan(ranked.indexOf("sassy"))
   })
 
   it("should rank words that place yellow letters in new positions", () => {
