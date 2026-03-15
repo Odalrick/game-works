@@ -134,4 +134,24 @@ describe("filterCandidates", () => {
     expect(result).not.toContain("index")
     expect(result).not.toContain("tweet")
   })
+
+  it("should not globally exclude a letter that is white in one guess but yellow/green in another", () => {
+    const guesses: GuessRecord[] = [
+      { word: "pease", feedback: [WHITE, YELLOW, YELLOW, WHITE, WHITE] },
+      { word: "parae", feedback: [WHITE, WHITE, WHITE, GREEN, WHITE] },
+      { word: "paean", feedback: [WHITE, WHITE, GREEN, GREEN, GREEN] },
+      { word: "polis", feedback: [WHITE, WHITE, YELLOW, WHITE, WHITE] },
+      { word: "penis", feedback: [WHITE, YELLOW, YELLOW, WHITE, WHITE] },
+    ]
+    const constraints = deriveConstraints(guesses)
+    // E is yellow in PEASE and green in PAEAN — must not be globally excluded
+    // just because it's white in PARAE
+    expect(constraints.excludedLetters.has("e")).toBe(false)
+
+    const candidates = filterCandidates(
+      ["clean", "pizza", "crane"],
+      constraints,
+    )
+    expect(candidates).toContain("clean")
+  })
 })

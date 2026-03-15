@@ -13,12 +13,24 @@ export function deriveConstraints(guesses: GuessRecord[]): PositionConstraint {
   const excludedLetters = new Set<string>()
   const excludedPositions = new Map<string, Set<number>>()
 
+  // Pre-scan: collect letters that appear as green or yellow in any guess.
+  // A letter that is white in one guess but green/yellow in another must not
+  // be globally excluded.
+  const everGreenOrYellow = new Set<string>()
+  for (const guess of guesses) {
+    for (let position = 0; position < 5; position++) {
+      const state = guess.feedback[position]
+      if (state === TileState.GREEN || state === TileState.YELLOW) {
+        everGreenOrYellow.add(guess.word[position])
+      }
+    }
+  }
+
   for (const guess of guesses) {
     const { word, feedback } = guess
 
-    // First pass: count green and yellow occurrences per letter
+    // Per-guess pass: count green and yellow occurrences of each letter
     const letterCounts = new Map<string, number>()
-    const letterHasWhite = new Map<string, boolean>()
 
     for (let position = 0; position < 5; position++) {
       const letter = word[position]
@@ -27,12 +39,9 @@ export function deriveConstraints(guesses: GuessRecord[]): PositionConstraint {
       if (state === TileState.GREEN || state === TileState.YELLOW) {
         letterCounts.set(letter, (letterCounts.get(letter) ?? 0) + 1)
       }
-      if (state === TileState.WHITE) {
-        letterHasWhite.set(letter, true)
-      }
     }
 
-    // Second pass: apply constraints
+    // Apply constraints
     for (let position = 0; position < 5; position++) {
       const letter = word[position]
       const state = feedback[position]
@@ -46,9 +55,9 @@ export function deriveConstraints(guesses: GuessRecord[]): PositionConstraint {
         excludedPositions.get(letter)!.add(position)
       } else if (state === TileState.WHITE) {
         const greenOrYellowCount = letterCounts.get(letter) ?? 0
-        if (greenOrYellowCount > 0) {
-          // Letter appears elsewhere as green/yellow — don't globally exclude,
-          // just exclude this position
+        if (greenOrYellowCount > 0 || everGreenOrYellow.has(letter)) {
+          // Letter appears as green/yellow in this guess or another —
+          // don't globally exclude, just exclude this position
           if (!excludedPositions.has(letter)) {
             excludedPositions.set(letter, new Set())
           }
