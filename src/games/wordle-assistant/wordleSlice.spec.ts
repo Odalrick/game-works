@@ -122,14 +122,26 @@ describe("wordle slice", () => {
     it("should replace the quest rule", () => {
       const state = reducer(
         undefined,
-        setQuestRule({ type: "endsWith", letter: "s" }),
+        setQuestRule({
+          type: "lettersAt",
+          letters: ["", "", "", "", "s"],
+        }),
       )
-      expect(state.questRule).toEqual({ type: "endsWith", letter: "s" })
+      expect(state.questRule).toEqual({
+        type: "lettersAt",
+        letters: ["", "", "", "", "s"],
+      })
     })
 
     it("should overwrite a previous quest rule", () => {
       const state = reducer(
-        reducer(undefined, setQuestRule({ type: "endsWith", letter: "s" })),
+        reducer(
+          undefined,
+          setQuestRule({
+            type: "lettersAt",
+            letters: ["", "", "", "", "s"],
+          }),
+        ),
         setQuestRule({ type: "avoid", letter: "e" }),
       )
       expect(state.questRule).toEqual({
@@ -165,7 +177,13 @@ describe("wordle slice", () => {
   describe("reset", () => {
     it("should clear guesses and quest rule", () => {
       let state = reducer(undefined, addGuess(makeGuess("crane")))
-      state = reducer(state, setQuestRule({ type: "endsWith", letter: "s" }))
+      state = reducer(
+        state,
+        setQuestRule({
+          type: "lettersAt",
+          letters: ["", "", "", "", "s"],
+        }),
+      )
       state = reducer(state, reset())
       expect(state.guesses).toEqual([])
       expect(state.questRule).toEqual({ type: "none" })

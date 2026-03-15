@@ -40,12 +40,24 @@ function serialiseGameState(
   }
 
   if (state.questRule.type !== "none") {
-    const label =
-      state.questRule.type === "endsWith"
-        ? `ends with ${state.questRule.letter.toUpperCase()}`
-        : state.questRule.type === "avoid"
-          ? `avoid ${state.questRule.letter.toUpperCase()}`
-          : `use ${state.questRule.letter.toUpperCase()}`
+    let label: string
+    switch (state.questRule.type) {
+      case "lettersAt": {
+        const parts = state.questRule.letters
+          .map((letter, position) =>
+            letter ? `${letter.toUpperCase()} at ${position + 1}` : "",
+          )
+          .filter(Boolean)
+        label = parts.length > 0 ? parts.join(", ") : "letters at (empty)"
+        break
+      }
+      case "avoid":
+        label = `avoid ${state.questRule.letter.toUpperCase()}`
+        break
+      case "use":
+        label = `use ${state.questRule.letter.toUpperCase()}`
+        break
+    }
     sections.push(`Quest: ${label}`)
   }
 

@@ -8,10 +8,38 @@ describe("satisfiesRule", () => {
     expect(satisfiesRule("crane", rule)).toBe(true)
   })
 
-  it("checks endsWith rule", () => {
-    const rule: QuestRule = { type: "endsWith", letter: "y" }
+  it("checks lettersAt rule — matches required positions", () => {
+    const rule: QuestRule = {
+      type: "lettersAt",
+      letters: ["c", "", "", "", "y"],
+    }
     expect(satisfiesRule("crazy", rule)).toBe(true)
     expect(satisfiesRule("crane", rule)).toBe(false)
+    expect(satisfiesRule("curly", rule)).toBe(true)
+  })
+
+  it("checks lettersAt rule — all empty passes any word", () => {
+    const rule: QuestRule = {
+      type: "lettersAt",
+      letters: ["", "", "", "", ""],
+    }
+    expect(satisfiesRule("crane", rule)).toBe(true)
+  })
+
+  it("checks lettersAt rule — single position acts like startsWith/endsWith", () => {
+    const endsWithY: QuestRule = {
+      type: "lettersAt",
+      letters: ["", "", "", "", "y"],
+    }
+    expect(satisfiesRule("crazy", endsWithY)).toBe(true)
+    expect(satisfiesRule("crane", endsWithY)).toBe(false)
+
+    const startsWithS: QuestRule = {
+      type: "lettersAt",
+      letters: ["s", "", "", "", ""],
+    }
+    expect(satisfiesRule("stone", startsWithS)).toBe(true)
+    expect(satisfiesRule("crane", startsWithS)).toBe(false)
   })
 
   it("checks avoid rule — word must not contain the letter", () => {

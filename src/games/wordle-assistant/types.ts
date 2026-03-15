@@ -11,8 +11,10 @@ export type GuessRecord = {
   feedback: Feedback
 }
 
+export type LettersAtPositions = [string, string, string, string, string]
+
 export type QuestRule =
   | { type: "none" }
-  | { type: "endsWith"; letter: string }
+  | { type: "lettersAt"; letters: LettersAtPositions }
   | { type: "avoid"; letter: string }
   | { type: "use"; letter: string }

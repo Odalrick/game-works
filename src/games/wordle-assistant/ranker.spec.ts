@@ -65,7 +65,10 @@ describe("rankSeek", () => {
 })
 
 describe("rankQuest", () => {
-  const endsWithY: QuestRule = { type: "endsWith", letter: "y" }
+  const endsWithY: QuestRule = {
+    type: "lettersAt",
+    letters: ["", "", "", "", "y"],
+  }
 
   it("should include only words satisfying the quest rule", () => {
     const pool = ["crazy", "daily", "crane", "stone"]

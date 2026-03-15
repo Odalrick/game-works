@@ -4,8 +4,10 @@ export function satisfiesRule(word: string, rule: QuestRule): boolean {
   switch (rule.type) {
     case "none":
       return true
-    case "endsWith":
-      return word.endsWith(rule.letter)
+    case "lettersAt":
+      return rule.letters.every(
+        (letter, position) => letter === "" || word[position] === letter,
+      )
     case "avoid":
       return !word.includes(rule.letter)
     case "use":

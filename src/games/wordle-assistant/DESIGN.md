@@ -25,7 +25,7 @@ future answers.
 
 A dropdown selects the rule type, with conditional inputs for parameters (letter, count). Known rule types so far:
 
-- "use words ending with [letter]"
+- "require specific letters at positions" (e.g. starts with R, ends with Y, or both)
 - "use no more than [count] of [letter]"
 - "use at least [count] of [letter]"
 
@@ -55,9 +55,11 @@ type GuessRecord = {
 Tagged union, extensible:
 
 ```ts
+type LettersAtPositions = [string, string, string, string, string]
+
 type QuestRule =
   | { type: "none" }
-  | { type: "endsWith"; letter: string }
+  | { type: "lettersAt"; letters: LettersAtPositions }
   | { type: "avoid"; letter: string }
   | { type: "use"; letter: string }
 ```
