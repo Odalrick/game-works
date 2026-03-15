@@ -147,5 +147,24 @@ describe("rankQuest", () => {
       expect(ranked.indexOf("three")).toBeLessThan(ranked.indexOf("crane"))
       expect(ranked.indexOf("creep")).toBeLessThan(ranked.indexOf("crane"))
     })
+
+    it("should promote E-heavy words when quest is 'use E' after ESSES all white", () => {
+      // B4 scenario: ESSES ..... then quest "use E"
+      // Words with multiple E's should rank above words with one E
+      const pool = ["arear", "reata", "creep", "geese", "tepee", "could"]
+      const guesses: GuessRecord[] = [
+        { word: "esses", feedback: [WHITE, WHITE, WHITE, WHITE, WHITE] },
+      ]
+      const rule: QuestRule = { type: "use", letter: "e" }
+      const ranked = rankQuest(pool, guesses, rule, pool, [])
+      // geese (3 e's), tepee (3 e's), creep (2 e's) should all rank above
+      // arear (1 e), reata (1 e)
+      expect(ranked).not.toContain("could") // no e
+      for (const multiE of ["geese", "tepee", "creep"]) {
+        for (const singleE of ["arear", "reata"]) {
+          expect(ranked.indexOf(multiE)).toBeLessThan(ranked.indexOf(singleE))
+        }
+      }
+    })
   })
 })
