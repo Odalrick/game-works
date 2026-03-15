@@ -77,27 +77,15 @@ describe("rankSeek", () => {
 })
 
 describe("rankQuest", () => {
-  const endsWithY: QuestRule = {
-    type: "lettersAt",
-    letters: ["", "", "", "", "y"],
-  }
-
-  it("should include only words satisfying the quest rule", () => {
-    const pool = ["crazy", "daily", "crane", "stone"]
-    const guesses: GuessRecord[] = []
-    const ranked = rankQuest(pool, guesses, endsWithY, pool, [])
-    expect(ranked).toContain("crazy")
-    expect(ranked).toContain("daily")
-    expect(ranked).not.toContain("crane")
-    expect(ranked).not.toContain("stone")
-  })
-
-  it("should deprioritise words that are also candidate answers", () => {
+  it("should deprioritise candidate answers regardless of quest type", () => {
     const pool = ["crazy", "daily", "foggy", "lumpy"]
     const candidates = ["crazy", "daily"]
+    const rule: QuestRule = {
+      type: "lettersAt",
+      letters: ["", "", "", "", "y"],
+    }
     const guesses: GuessRecord[] = []
-    const ranked = rankQuest(pool, guesses, endsWithY, pool, candidates)
-    // foggy and lumpy (not candidates) should rank above crazy and daily (candidates)
+    const ranked = rankQuest(pool, guesses, rule, pool, candidates)
     const foggyIndex = ranked.indexOf("foggy")
     const lumpyIndex = ranked.indexOf("lumpy")
     const crazyIndex = ranked.indexOf("crazy")
@@ -106,5 +94,58 @@ describe("rankQuest", () => {
     expect(foggyIndex).toBeLessThan(dailyIndex)
     expect(lumpyIndex).toBeLessThan(crazyIndex)
     expect(lumpyIndex).toBeLessThan(dailyIndex)
+  })
+
+  describe("lettersAt", () => {
+    it("should include only words matching required positions", () => {
+      const pool = ["crazy", "daily", "crane", "stone"]
+      const rule: QuestRule = {
+        type: "lettersAt",
+        letters: ["", "", "", "", "y"],
+      }
+      const ranked = rankQuest(pool, [], rule, pool, [])
+      expect(ranked).toContain("crazy")
+      expect(ranked).toContain("daily")
+      expect(ranked).not.toContain("crane")
+      expect(ranked).not.toContain("stone")
+    })
+  })
+
+  describe("avoid", () => {
+    it("should exclude words containing the avoided letter", () => {
+      const pool = ["crane", "blind", "stone", "brake"]
+      const rule: QuestRule = { type: "avoid", letter: "e" }
+      const ranked = rankQuest(pool, [], rule, pool, [])
+      expect(ranked).toContain("blind")
+      expect(ranked).not.toContain("crane")
+      expect(ranked).not.toContain("stone")
+      expect(ranked).not.toContain("brake")
+    })
+  })
+
+  describe("use", () => {
+    it("should only include words containing the wanted letter", () => {
+      const pool = ["crane", "blind", "stone", "creep"]
+      const rule: QuestRule = { type: "use", letter: "e" }
+      const ranked = rankQuest(pool, [], rule, pool, [])
+      expect(ranked).toContain("crane")
+      expect(ranked).toContain("stone")
+      expect(ranked).toContain("creep")
+      expect(ranked).not.toContain("blind")
+    })
+
+    it("should promote words with more occurrences of the wanted letter", () => {
+      // creep has 2 e's, crane has 1 e — creep should rank higher
+      // assuming wander scores them similarly otherwise
+      const pool = ["crane", "creep", "three"]
+      const guesses: GuessRecord[] = [
+        { word: "slung", feedback: [WHITE, WHITE, WHITE, WHITE, WHITE] },
+      ]
+      const rule: QuestRule = { type: "use", letter: "e" }
+      const ranked = rankQuest(pool, guesses, rule, pool, [])
+      // three (2 e's) and creep (2 e's) should rank above crane (1 e)
+      expect(ranked.indexOf("three")).toBeLessThan(ranked.indexOf("crane"))
+      expect(ranked.indexOf("creep")).toBeLessThan(ranked.indexOf("crane"))
+    })
   })
 })

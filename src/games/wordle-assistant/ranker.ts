@@ -1,6 +1,5 @@
 import type { GuessRecord, QuestRule } from "./types"
 import { TileState } from "./types"
-import { satisfiesRule } from "./questRule"
 
 export function letterFrequencies(
   pool: string[],
@@ -99,6 +98,22 @@ export function rankWander(
   guesses: GuessRecord[],
   referencePool: string[],
 ): string[] {
+  return wanderRank(pool, guesses, referencePool)
+}
+
+export function rankSeek(
+  candidates: string[],
+  guesses: GuessRecord[],
+  referencePool: string[],
+): string[] {
+  return wanderRank(candidates, guesses, referencePool)
+}
+
+function wanderRank(
+  pool: string[],
+  guesses: GuessRecord[],
+  referencePool: string[],
+): string[] {
   const tested = testedLetters(guesses)
   const frequency = overallLetterFrequency(
     referencePool.length > 0 ? referencePool : pool,
@@ -113,23 +128,76 @@ export function rankWander(
   })
 }
 
-export function rankSeek(
-  candidates: string[],
-  guesses: GuessRecord[],
-  referencePool: string[],
-): string[] {
-  const tested = testedLetters(guesses)
-  const frequency = overallLetterFrequency(
-    referencePool.length > 0 ? referencePool : candidates,
-  )
-  const greens = greenPositions(guesses)
+function antiSolve(ranked: string[], candidates: string[]): string[] {
+  const candidateSet = new Set(candidates)
+  const nonCandidates = ranked.filter((word) => !candidateSet.has(word))
+  const isCandidates = ranked.filter((word) => candidateSet.has(word))
+  return [...nonCandidates, ...isCandidates]
+}
 
-  return [...candidates].sort((a, b) => {
-    return (
-      scoreWander(b, tested, frequency, greens) -
-      scoreWander(a, tested, frequency, greens)
-    )
-  })
+function letterCount(word: string, letter: string): number {
+  let count = 0
+  for (const character of word) {
+    if (character === letter) count++
+  }
+  return count
+}
+
+function rankQuestUse(
+  pool: string[],
+  guesses: GuessRecord[],
+  letter: string,
+  referencePool: string[],
+  candidates: string[],
+): string[] {
+  const compliant = pool.filter((word) => word.includes(letter))
+  const ranked = wanderRank(compliant, guesses, referencePool)
+
+  // Stable sort: partition by letter count descending, then concatenate
+  const buckets: string[][] = [[], [], [], [], []]
+  for (const word of ranked) {
+    const count = letterCount(word, letter)
+    const index = Math.min(count, 5) - 1
+    if (index < 0) {
+      continue
+    }
+    buckets[index].push(word)
+  }
+  const promoted = [
+    ...buckets[4],
+    ...buckets[3],
+    ...buckets[2],
+    ...buckets[1],
+    ...buckets[0],
+  ]
+
+  return antiSolve(promoted, candidates)
+}
+
+function rankQuestAvoid(
+  pool: string[],
+  guesses: GuessRecord[],
+  letter: string,
+  referencePool: string[],
+  candidates: string[],
+): string[] {
+  const compliant = pool.filter((word) => !word.includes(letter))
+  return antiSolve(wanderRank(compliant, guesses, referencePool), candidates)
+}
+
+function rankQuestLettersAt(
+  pool: string[],
+  guesses: GuessRecord[],
+  letters: [string, string, string, string, string],
+  referencePool: string[],
+  candidates: string[],
+): string[] {
+  const compliant = pool.filter((word) =>
+    letters.every(
+      (letter, position) => letter === "" || word[position] === letter,
+    ),
+  )
+  return antiSolve(wanderRank(compliant, guesses, referencePool), candidates)
 }
 
 export function rankQuest(
@@ -139,19 +207,26 @@ export function rankQuest(
   referencePool: string[],
   candidates: string[],
 ): string[] {
-  if (rule.type === "none") return []
-  const compliant = pool.filter((word) => satisfiesRule(word, rule))
-  const tested = testedLetters(guesses)
-  const frequency = overallLetterFrequency(referencePool)
-  const greens = greenPositions(guesses)
-  const candidateSet = new Set(candidates)
-
-  return compliant.sort((a, b) => {
-    const scoreA = scoreWander(a, tested, frequency, greens)
-    const scoreB = scoreWander(b, tested, frequency, greens)
-    // Anti-solving: deprioritise words that are candidate answers
-    const penaltyA = candidateSet.has(a) ? 1000 : 0
-    const penaltyB = candidateSet.has(b) ? 1000 : 0
-    return scoreB - penaltyB - (scoreA - penaltyA)
-  })
+  switch (rule.type) {
+    case "none":
+      return []
+    case "use":
+      return rankQuestUse(pool, guesses, rule.letter, referencePool, candidates)
+    case "avoid":
+      return rankQuestAvoid(
+        pool,
+        guesses,
+        rule.letter,
+        referencePool,
+        candidates,
+      )
+    case "lettersAt":
+      return rankQuestLettersAt(
+        pool,
+        guesses,
+        rule.letters,
+        referencePool,
+        candidates,
+      )
+  }
 }
