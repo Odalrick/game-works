@@ -74,6 +74,20 @@ describe("rankSeek", () => {
     expect(ranked).toContain("dance")
     expect(ranked).toContain("notch")
   })
+
+  it("should promote previously correct words above equally ranked candidates", () => {
+    // SEERS g.... SATAI g.... UNCOY .o.g. SPOON g.ggg
+    // Candidates: SHOON, SWOON — swoon is previously correct
+    const candidates = ["shoon", "swoon"]
+    const guesses: GuessRecord[] = [
+      { word: "seers", feedback: [GREEN, WHITE, WHITE, WHITE, WHITE] },
+      { word: "satai", feedback: [GREEN, WHITE, WHITE, WHITE, WHITE] },
+      { word: "uncoy", feedback: [WHITE, YELLOW, WHITE, GREEN, WHITE] },
+      { word: "spoon", feedback: [GREEN, WHITE, GREEN, GREEN, GREEN] },
+    ]
+    const ranked = rankSeek(candidates, guesses, candidates, ["swoon"])
+    expect(ranked[0]).toBe("swoon")
+  })
 })
 
 describe("rankQuest", () => {

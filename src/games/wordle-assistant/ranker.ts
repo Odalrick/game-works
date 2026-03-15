@@ -105,8 +105,14 @@ export function rankSeek(
   candidates: string[],
   guesses: GuessRecord[],
   referencePool: string[],
+  previouslyCorrect: string[] = [],
 ): string[] {
-  return wanderRank(candidates, guesses, referencePool)
+  const ranked = wanderRank(candidates, guesses, referencePool)
+  if (previouslyCorrect.length === 0) return ranked
+  const previousSet = new Set(previouslyCorrect)
+  const promoted = ranked.filter((word) => previousSet.has(word))
+  const rest = ranked.filter((word) => !previousSet.has(word))
+  return [...promoted, ...rest]
 }
 
 function wanderRank(

@@ -122,8 +122,9 @@ const WordleAssistant: React.FC<WordleAssistantProps> = ({ state, action }) => {
   )
 
   const seek = useMemo(
-    () => rankSeek(candidates, state.guesses, candidates),
-    [candidates, state.guesses],
+    () =>
+      rankSeek(candidates, state.guesses, candidates, state.previouslyCorrect),
+    [candidates, state.guesses, state.previouslyCorrect],
   )
 
   const quest = useMemo(
