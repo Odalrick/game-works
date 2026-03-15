@@ -47,6 +47,7 @@ const QuestRuleSelector: React.FC<QuestRuleSelectorProps> = ({
             onChange={(event) =>
               onChange({ ...rule, letter: event.target.value.toLowerCase() })
             }
+            onFocus={(event) => event.target.select()}
             className="quest-letter-input"
           />
         </>

@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { TileState } from "./types"
 import type { GuessRecord, Feedback } from "./types"
 import Tile from "./Tile"
@@ -9,8 +9,62 @@ interface GuessHistoryProps {
   onEditableChange: (index: number) => void
   onAddGuess: (guess: GuessRecord) => void
   onCycleTile: (guessIndex: number, position: number) => void
+  onReverseCycleTile: (guessIndex: number, position: number) => void
   inputWord: string
   onInputChange: (word: string) => void
+}
+
+function computeConflicts(guesses: GuessRecord[]): Set<string> {
+  const conflicts = new Set<string>()
+  for (let position = 0; position < 5; position++) {
+    let greenLetter: string | undefined
+    let hasConflictingGreens = false
+    for (let guessIndex = 0; guessIndex < guesses.length; guessIndex++) {
+      const letter = guesses[guessIndex].word[position]
+      const state = guesses[guessIndex].feedback[position]
+      if (state === TileState.GREEN) {
+        if (greenLetter === undefined) {
+          greenLetter = letter
+        } else if (letter !== greenLetter) {
+          hasConflictingGreens = true
+        }
+      }
+    }
+    if (greenLetter !== undefined) {
+      for (let guessIndex = 0; guessIndex < guesses.length; guessIndex++) {
+        const letter = guesses[guessIndex].word[position]
+        const state = guesses[guessIndex].feedback[position]
+        if (state === TileState.GREEN && hasConflictingGreens) {
+          conflicts.add(`${guessIndex}:${position}`)
+        } else if (state !== TileState.GREEN && letter === greenLetter) {
+          conflicts.add(`${guessIndex}:${position}`)
+        }
+      }
+    }
+  }
+  return conflicts
+}
+
+function prefillFeedback(word: string, guesses: GuessRecord[]): Feedback {
+  const feedback: Feedback = [
+    TileState.WHITE,
+    TileState.WHITE,
+    TileState.WHITE,
+    TileState.WHITE,
+    TileState.WHITE,
+  ]
+  for (let position = 0; position < 5; position++) {
+    for (const guess of guesses) {
+      if (
+        guess.feedback[position] === TileState.GREEN &&
+        guess.word[position] === word[position]
+      ) {
+        feedback[position] = TileState.GREEN
+        break
+      }
+    }
+  }
+  return feedback
 }
 
 const GuessHistory: React.FC<GuessHistoryProps> = ({
@@ -19,20 +73,17 @@ const GuessHistory: React.FC<GuessHistoryProps> = ({
   onEditableChange,
   onAddGuess,
   onCycleTile,
+  onReverseCycleTile,
   inputWord,
   onInputChange,
 }) => {
+  const conflicts = useMemo(() => computeConflicts(guesses), [guesses])
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
     const word = inputWord.toLowerCase().trim()
     if (word.length !== 5) return
-    const feedback: Feedback = [
-      TileState.WHITE,
-      TileState.WHITE,
-      TileState.WHITE,
-      TileState.WHITE,
-      TileState.WHITE,
-    ]
+    const feedback = prefillFeedback(word, guesses)
     onAddGuess({ word, feedback })
     onInputChange("")
   }
@@ -59,7 +110,9 @@ const GuessHistory: React.FC<GuessHistoryProps> = ({
                 letter={letter}
                 state={guess.feedback[position]}
                 onClick={() => onCycleTile(guessIndex, position)}
+                onRightClick={() => onReverseCycleTile(guessIndex, position)}
                 locked={editableIndex !== guessIndex}
+                conflict={conflicts.has(`${guessIndex}:${position}`)}
               />
             ))}
           </div>

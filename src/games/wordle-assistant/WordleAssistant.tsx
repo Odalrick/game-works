@@ -190,6 +190,9 @@ const WordleAssistant: React.FC<WordleAssistantProps> = ({ state, action }) => {
         onCycleTile={(index, position) =>
           action(actions.updateFeedback({ index, position }))
         }
+        onReverseCycleTile={(index, position) =>
+          action(actions.reverseFeedback({ index, position }))
+        }
         inputWord={inputWord}
         onInputChange={setInputWord}
       />

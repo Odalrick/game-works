@@ -18,6 +18,10 @@
   opacity: 0.8;
 }
 
+.wordle-tile-conflict {
+  border-color: #cc3333;
+}
+
 .guess-history {
   border: 1px solid var(--border-bright);
   border-bottom: none;

@@ -39,6 +39,12 @@ const cycleOrder: Record<TileState, TileState> = {
   [TileState.GREEN]: TileState.WHITE,
 }
 
+const reverseCycleOrder: Record<TileState, TileState> = {
+  [TileState.WHITE]: TileState.GREEN,
+  [TileState.GREEN]: TileState.YELLOW,
+  [TileState.YELLOW]: TileState.WHITE,
+}
+
 const wordleSlice = createSlice({
   name: "wordle",
   initialState,
@@ -53,6 +59,14 @@ const wordleSlice = createSlice({
       const { index, position } = action.payload
       const current = state.guesses[index].feedback[position]
       state.guesses[index].feedback[position] = cycleOrder[current]
+    },
+    reverseFeedback(
+      state,
+      action: PayloadAction<{ index: number; position: number }>,
+    ) {
+      const { index, position } = action.payload
+      const current = state.guesses[index].feedback[position]
+      state.guesses[index].feedback[position] = reverseCycleOrder[current]
     },
     setQuestRule(state, action: PayloadAction<QuestRule>) {
       state.questRule = action.payload
